@@ -4,8 +4,8 @@
 
 An interactive, illustrated map of local Christmas businesses — tree farms, bakeries,
 cocoa counters, toymakers and trim shops — built with [Leaflet](https://leafletjs.com)
-on top of Stadia Maps' hand-painted **Stamen Watercolor** tiles, dressed in a flat
-vector style that follows the illustrated header artwork.
+on top of Stadia Maps' **Alidade Smooth** tiles, dressed in a flat vector style that
+follows the illustrated header artwork.
 
 Hover a pin (or a card in the sidebar) and a little paper card unfolds with the
 business name, a short blurb, its address and hours, and a link to their site.
@@ -29,10 +29,10 @@ Any static host works for deployment — GitHub Pages, Netlify, S3, a folder on 
 
 ## Map tiles and the Stadia API key
 
-The watercolor tiles come from Stadia Maps, who host the Stamen designs. They serve
-key-free on `localhost` / `127.0.0.1`, so local development needs no setup. **On any
-other domain you need a free API key**, or the tiles come back 401 and the map stays
-blank (the page will tell you so, in that case).
+The basemap is Stadia Maps' Alidade Smooth. It serves key-free on `localhost` /
+`127.0.0.1`, so local development needs no setup. **On any other domain you need a free
+API key or an allowlisted domain**, or the tiles come back 401 and the map stays blank
+(the page will tell you so, in that case).
 
 Register at [client.stadiamaps.com](https://client.stadiamaps.com), then pick either route:
 
@@ -50,13 +50,13 @@ If no tiles load at all, the map raises a notice explaining this rather than sit
 blank. It waits for several consecutive failures with nothing painted, so a single
 unlucky tile won't trigger it, and it clears itself if the tiles start arriving.
 
-Attribution for Stadia, Stamen, OpenMapTiles and OpenStreetMap is already wired into
-the map's attribution control; their terms require you to keep it visible.
+Attribution for Stadia, OpenMapTiles and OpenStreetMap is already wired into the map's
+attribution control; their terms require you to keep it visible.
 
-Two layers are stacked: `stamen_watercolor` for the painting, and a translucent
-`stamen_terrain_labels` overlay so street names stay readable on top of it. Watercolor
-is only painted down to zoom 16, so it is set to upscale past that (`maxNativeZoom: 16`)
-rather than vanish and leave the labels floating on blank paper.
+The style is a single layer — `alidade_smooth`, zoom 1–20, with `{r}` for HiDPI tiles.
+It carries its own street lettering, so no labels overlay is needed. To try another
+Stadia style, swap the style name in the tile URL in `js/app.js` and update the
+attribution to match that style's requirements.
 
 ## The directory data
 
@@ -118,8 +118,7 @@ index.html              page shell — masthead, illustrated band, sidebar, map 
 css/styles.css          the flat look: palette, masthead, cards, pins, snowfall
 js/app.js               map setup, pins, hover cards, filtering, search, legend
 data/businesses.json    the directory itself
-assets/holiday-header2.svg   the header illustration (holiday-header.svg is the
-                             earlier crop, kept but unused)
+assets/holiday-header2.svg   the header illustration
 vendor/leaflet/         Leaflet 1.9.4 (BSD-2-Clause), vendored
 vendor/fonts/           Fredoka + Nunito Sans (SIL OFL), vendored
 ```

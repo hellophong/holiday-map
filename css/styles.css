@@ -145,8 +145,10 @@ a { color: var(--coral-text); }
 
 .banner__main {
   display: block;
+  font-size: 1.5em;
   font-weight: 600;
-  letter-spacing: -.01em;
+  line-height: .95;
+  letter-spacing: -.015em;
 }
 
 .banner__subtitle {
@@ -375,10 +377,6 @@ a { color: var(--coral-text); }
   inset: 0;
   background: var(--mint);
 }
-
-/* Nudges the painterly tiles toward the flat palette so they sit with
-   the rest of the page. Delete this rule for untouched watercolor. */
-.leaflet-tile-pane { filter: saturate(.82) contrast(.94) brightness(1.04); }
 
 .noscript {
   position: absolute;

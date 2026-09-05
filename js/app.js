@@ -1,15 +1,16 @@
 /* -----------------------------------------------------------------
    The Merry Mile — an interactive Christmas business directory
-   Leaflet + Stadia's Stamen Watercolor tiles. No build step.
+   Leaflet + Stadia's Alidade Smooth tiles. No build step.
    ----------------------------------------------------------------- */
 
 (function () {
   "use strict";
 
-  /* Stadia Maps serves the watercolor tiles. They work key-free on
+  /* Stadia Maps serves the basemap tiles. They work key-free on
      localhost / 127.0.0.1; for any other domain, register a free key at
      https://client.stadiamaps.com and drop it in here (or set
-     window.STADIA_API_KEY before this script runs). */
+     window.STADIA_API_KEY before this script runs), or allowlist the domain
+     on your Stadia property. */
   var STADIA_API_KEY = window.STADIA_API_KEY || "";
   var DATA_URL = "data/businesses.json";
   var HOVER_CLOSE_DELAY = 260; // ms of grace to travel from pin to card
@@ -34,33 +35,20 @@
 
   function addTiles() {
     var attribution =
-      '&copy; <a href="https://www.stadiamaps.com/" target="_blank" rel="noopener">Stadia Maps</a> ' +
-      '&copy; <a href="https://www.stamen.com/" target="_blank" rel="noopener">Stamen Design</a> ' +
+      '&copy; <a href="https://stadiamaps.com/" target="_blank" rel="noopener">Stadia Maps</a> ' +
       '&copy; <a href="https://openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> ' +
       '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
 
-    /* Watercolor is only painted as deep as z16. maxNativeZoom lets Leaflet
-       upscale those tiles past that instead of hiding the layer, so zooming
-       in doesn't strand the labels on blank paper. */
-    var watercolor = L.tileLayer(key("https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg"), {
+    /* Alidade Smooth carries its own lettering, so it needs no separate
+       labels overlay. */
+    var base = L.tileLayer(key("https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"), {
       minZoom: 1,
-      maxNativeZoom: 16,
-      maxZoom: 18,
+      maxZoom: 20,
       attribution: attribution
     }).addTo(map);
 
-    watercolor.on("tileload", onTileLoad);
-    watercolor.on("tileerror", onTileError);
-
-    /* Watercolor has no lettering of its own — this overlay puts the
-       street and place names back on top without spoiling the paint. */
-    L.tileLayer(key("https://tiles.stadiamaps.com/tiles/stamen_terrain_labels/{z}/{x}/{y}{r}.png"), {
-      minZoom: 1,
-      maxNativeZoom: 18,
-      maxZoom: 18,
-      opacity: 0.85,
-      attribution: ""
-    }).addTo(map);
+    base.on("tileload", onTileLoad);
+    base.on("tileerror", onTileError);
   }
 
   /* ----------------------- Tile health notice --------------------- */
@@ -90,8 +78,8 @@
     tileWarning.onAdd = function () {
       var div = L.DomUtil.create("div", "map-legend tile-warning");
       div.innerHTML =
-        "<h2>The paint didn't arrive</h2>" +
-        "<p style='margin:0 0 .35rem;max-width:15rem'>No watercolor tiles are loading. " +
+        "<h2>The map didn't arrive</h2>" +
+        "<p style='margin:0 0 .35rem;max-width:15rem'>No map tiles are loading. " +
         "Stadia Maps serves them key-free on <code>localhost</code> only — anywhere else an " +
         "unauthenticated request comes back <code>401</code>.</p>" +
         "<p style='margin:0;max-width:15rem'>Add an API key in <code>js/app.js</code> or " +
