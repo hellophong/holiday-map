@@ -4,10 +4,10 @@
     "title": "Holiday Guide",
     "subtitle": "Shop Local For Gifts And More",
     "center": [
-      44.4759,
-      -73.2121
+      37.5407,
+      -77.436
     ],
-    "zoom": 15,
+    "zoom": 10,
     "attributionNote": "RichMag Labs-Holiday Guide Map 2026-090526 ."
   },
   "categories": {
@@ -44,159 +44,29 @@
   },
   "businesses": [
     {
-      "id": "balsam-hollow",
-      "name": "Balsam Hollow Tree Farm",
-      "category": "tree",
-      "blurb": "Cut-your-own balsams, a wood stove that never goes out, and free cider for anyone who carries their own tree.",
-      "url": "https://example.com/balsam-hollow",
-      "address": "412 North Ave",
-      "hours": "Fri–Sun, 9am–dusk",
-      "coords": [
-        44.4881,
-        -73.2265
-      ]
-    },
-    {
-      "id": "sugarplum-bakehouse",
-      "name": "Sugarplum Bakehouse",
-      "category": "bakery",
-      "blurb": "Stollen, gingerbread cottages, and a saffron bun the neighborhood queues around the block for.",
-      "url": "https://example.com/sugarplum",
-      "address": "88 Church St",
-      "hours": "Daily, 7am–4pm",
-      "coords": [
-        44.4771,
-        -73.2126
-      ]
-    },
-    {
-      "id": "kettle-kringle",
-      "name": "Kettle & Kringle",
-      "category": "cocoa",
-      "blurb": "Drinking chocolate thick enough to stand a spoon in, plus peppermint marshmallows toasted to order.",
-      "url": "https://example.com/kettle-kringle",
-      "address": "15 College St",
-      "hours": "Daily, 8am–9pm",
-      "coords": [
-        44.4796,
-        -73.2149
-      ]
-    },
-    {
-      "id": "tinsel-tinker",
-      "name": "The Tinsel Tinker",
-      "category": "toys",
-      "blurb": "A two-person workshop turning out wooden trains, tin robots, and rocking horses with terrible attitudes.",
-      "url": "https://example.com/tinsel-tinker",
-      "address": "9 Maple St",
-      "hours": "Wed–Sat, 11am–6pm",
-      "coords": [
-        44.4718,
-        -73.2153
-      ]
-    },
-    {
-      "id": "frost-fair",
-      "name": "Frost Fair Market",
+      "id": "stratford-hall",
+      "name": "Stratford Hall Historic Preserve",
       "category": "market",
-      "blurb": "Forty wooden chalets of makers, mulled wine, and one very committed brass band.",
-      "url": "https://example.com/frost-fair",
-      "address": "City Hall Park",
-      "hours": "Thu–Sun, 12pm–8pm",
+      "blurb": "The gift shop carries sweaters, books, kitchenware and stuffed animals with real historic character, plus custom gift baskets of premium jams, nuts, handmade ornaments, Edwards petite country ham and Stratford Hall grits milled on site in the 1738 gristmill.",
+      "url": "https://stratfordhall.org",
+      "address": "483 Great House Road, Stratford",
+      "phone": "804-493-8038",
       "coords": [
-        44.4759,
-        -73.2118
+        38.15194,
+        -76.8395
       ]
     },
     {
-      "id": "glowworm-lights",
-      "name": "Glowworm Lights Co.",
-      "category": "decor",
-      "blurb": "Vintage bulbs, hand-blown baubles, and a repair bench for the strand your grandmother refused to throw out.",
-      "url": "https://example.com/glowworm",
-      "address": "230 Pine St",
-      "hours": "Tue–Sun, 10am–7pm",
-      "coords": [
-        44.4703,
-        -73.2098
-      ]
-    },
-    {
-      "id": "nutmeg-nook",
-      "name": "The Nutmeg Nook",
+      "id": "wpa-bakery",
+      "name": "WPA Bakery",
       "category": "bakery",
-      "blurb": "Spice merchants since 1948. Buy cinnamon by the stick and leave smelling like a pie.",
-      "url": "https://example.com/nutmeg-nook",
-      "address": "51 Main St",
-      "hours": "Mon–Sat, 9am–5pm",
+      "blurb": "Holiday desserts including a pumpkin-caramel swirl cheesecake, with most selections adaptable to gluten-free and vegan diets. Order guides post the first week of November and December — call or email to place an order.",
+      "url": "https://wpasouthside.com",
+      "address": "3414 Semmes Ave.",
+      "phone": "804-477-6449",
       "coords": [
-        44.4762,
-        -73.2178
-      ]
-    },
-    {
-      "id": "silver-bells",
-      "name": "Silver Bells Fine Trim",
-      "category": "decor",
-      "blurb": "Ribbon by the yard, garlands by the fathom, and a bow-tying lesson with every order over a dollar.",
-      "url": "https://example.com/silver-bells",
-      "address": "3 Bank St",
-      "hours": "Daily, 10am–6pm",
-      "coords": [
-        44.4782,
-        -73.2143
-      ]
-    },
-    {
-      "id": "wassail-works",
-      "name": "Wassail Works",
-      "category": "cocoa",
-      "blurb": "Hot spiced cider on tap, sold by the growler. Bring the pot, they'll fill it.",
-      "url": "https://example.com/wassail-works",
-      "address": "144 Battery St",
-      "hours": "Wed–Sun, 3pm–10pm",
-      "coords": [
-        44.4805,
-        -73.2205
-      ]
-    },
-    {
-      "id": "reindeer-rest",
-      "name": "Reindeer Rest Stables",
-      "category": "tree",
-      "blurb": "Sleigh rides through the orchard, hay bales optional, hot chestnuts absolutely mandatory.",
-      "url": "https://example.com/reindeer-rest",
-      "address": "700 Riverside Ave",
-      "hours": "Sat–Sun, 10am–4pm",
-      "coords": [
-        44.4836,
-        -73.2003
-      ]
-    },
-    {
-      "id": "paper-partridge",
-      "name": "The Paper Partridge",
-      "category": "market",
-      "blurb": "Letterpress cards, gift wrap you'll feel guilty tearing, and a mailbox straight to the North Pole.",
-      "url": "https://example.com/paper-partridge",
-      "address": "27 Cherry St",
-      "hours": "Tue–Sat, 10am–6pm",
-      "coords": [
-        44.4788,
-        -73.2101
-      ]
-    },
-    {
-      "id": "mistletoe-mercantile",
-      "name": "Mistletoe Mercantile",
-      "category": "toys",
-      "blurb": "Stocking stuffers, wind-up nonsense, and a penny-candy counter run entirely on the honor system.",
-      "url": "https://example.com/mistletoe",
-      "address": "62 King St",
-      "hours": "Daily, 11am–7pm",
-      "coords": [
-        44.4736,
-        -73.2189
+        37.515681,
+        -77.469732
       ]
     }
   ]

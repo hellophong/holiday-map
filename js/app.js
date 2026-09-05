@@ -153,10 +153,20 @@
     '<circle cx="6" cy="6" r="4.6" stroke="currentColor" stroke-width="1.3"/>' +
     '<path d="M6 3.6V6l1.8 1.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
 
+  var PHONE_ICON =
+    '<svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">' +
+    '<path d="M3 1.6h2l1 2.3-1.2.9a7 7 0 0 0 3.4 3.4l.9-1.2 2.3 1v2A1.4 1.4 0 0 1 10 11 8.6 8.6 0 0 1 1 2a1.4 1.4 0 0 1 1.4-1.4z" ' +
+    'stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>';
+
   function popupHtml(business, category) {
     var details = [];
     if (business.address) details.push("<span>" + PIN_ICON + esc(business.address) + "</span>");
     if (business.hours) details.push("<span>" + CLOCK_ICON + esc(business.hours) + "</span>");
+    if (business.phone) {
+      details.push("<span>" + PHONE_ICON +
+        '<a class="pop__phone" href="tel:' + esc(business.phone.replace(/[^0-9+]/g, "")) + '">' +
+        esc(business.phone) + "</a></span>");
+    }
 
     return (
       '<div class="pop" style="--pop-color:' + category.color + '">' +

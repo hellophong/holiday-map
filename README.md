@@ -92,6 +92,7 @@ business is hard-coded in the HTML or JS. Edit that file and reload.
       "url": "https://example.com",     // optional — the card's link button
       "address": "88 Church St",        // optional
       "hours": "Daily, 7am–4pm",        // optional
+      "phone": "804-555-0100",          // optional; shown as a tel: link
       "coords": [44.4771, -73.2126]     // [latitude, longitude]
     }
   ]
@@ -108,8 +109,8 @@ name — the filter chips, legend and pin colours all build themselves from that
 Text from the JSON is HTML-escaped before rendering, so apostrophes and ampersands
 in business names are safe.
 
-> The businesses shipped here are sample data — fictional shops scattered around
-> Burlington, Vermont. Swap in your own.
+> The directory currently holds two real Richmond-area listings. Add the rest the
+> same way — one object per business.
 
 ## What's in the box
 

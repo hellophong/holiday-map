@@ -502,6 +502,13 @@ a { color: var(--coral-text); }
 
 .pop__details svg { flex: none; opacity: .6; }
 
+.leaflet-container a.pop__phone {
+  color: inherit;
+  text-decoration: none;
+}
+
+.leaflet-container a.pop__phone:hover { text-decoration: underline; }
+
 .leaflet-container a.pop__link {
   display: inline-block;
   margin-top: .7rem;
