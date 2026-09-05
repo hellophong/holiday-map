@@ -23,6 +23,10 @@
       "label": "Cocoa & Cafés",
       "color": "#633d7a"
     },
+    "dining": {
+      "label": "Food & Drink",
+      "color": "#a8336b"
+    },
     "toys": {
       "label": "Toys & Makers",
       "color": "#f8a92d"
@@ -38,6 +42,14 @@
     "decor": {
       "label": "Trim & Decor",
       "color": "#4d6998"
+    },
+    "services": {
+      "label": "Home & Services",
+      "color": "#2f8f9e"
+    },
+    "outings": {
+      "label": "Things To Do",
+      "color": "#6b9a3a"
     }
   },
   "businesses": [
