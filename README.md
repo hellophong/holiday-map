@@ -103,8 +103,9 @@ Append an object to `businesses` with a unique `id`, a `category` that exists in
 `categories`, and `coords` as `[lat, lng]` (right-click a spot in Google Maps to copy
 them in that order). New categories need only a label and a colour — the filter
 chips, legend and pin colours all build themselves from that map. The number label
-inside each pin is set to white or deep purple automatically, whichever reads better
-on that colour.
+inside a pin is set to white or deep purple automatically, whichever reads better on
+that colour; if neither clears 4.5:1, the fill under the number is deepened until white
+does. Chips and legend dots always show the palette colour as given.
 
 Text from the JSON is HTML-escaped before rendering, so apostrophes and ampersands
 in business names are safe.
@@ -132,7 +133,8 @@ cropped, whatever the viewport.
 
 ## Features
 
-- **Numbered directory** — the sidebar lists business names in alphabetical order, each
+- **Numbered directory** — the sidebar lists business names alphabetically (a leading
+  "The" is ignored, so "The Nutmeg Nook" files under N), each
   with a number that matches its pin. Numbers are assigned once across the whole
   directory, so filtering and searching hide rows without renumbering anything.
 - **Details on hover** — the blurb, address, phone and link live in the card that opens

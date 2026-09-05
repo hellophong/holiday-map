@@ -97,10 +97,14 @@
   /* Every listing carries a number, assigned once over the whole directory in
      alphabetical order. Filtering and searching hide rows but never renumber
      them, so the number beside a name always matches the pin on the map. */
+  function sortKey(name) {
+    return name.replace(/^the\s+/i, "");   // "The Nutmeg Nook" files under N
+  }
+
   function assignNumbers() {
     state.data.businesses
       .slice()
-      .sort(function (a, b) { return a.name.localeCompare(b.name); })
+      .sort(function (a, b) { return sortKey(a.name).localeCompare(sortKey(b.name)); })
       .forEach(function (business, index) {
         state.numbers[business.id] = index + 1;
       });
@@ -131,23 +135,52 @@
   }
 
   var INK = "#3e2a56";
+  var INK_DEEP = "#2a1838";
+  var AA = 4.5;
 
-  function labelColor(hex) {
+  function mix(hex, towards, amount) {
+    var a = parseInt(hex.slice(1), 16), b = parseInt(towards.slice(1), 16), out = "#";
+    for (var shift = 16; shift >= 0; shift -= 8) {
+      var ca = (a >> shift) & 255, cb = (b >> shift) & 255;
+      var c = Math.round(ca + (cb - ca) * amount);
+      out += (c < 16 ? "0" : "") + c.toString(16);
+    }
+    return out;
+  }
+
+  /* Numbers sit directly on the category colour, and a couple of those — the
+     coral and the green — are mid-tone enough that neither white nor deep
+     purple reaches AA on them. Where that happens the fill is deepened just
+     until white text clears the threshold. Chips and legend dots keep the
+     palette colour untouched; only the fill under a number moves. */
+  function numberStyle(hex) {
     var bg = luminance(hex);
-    return contrast(bg, 1) >= contrast(bg, luminance(INK)) ? "#ffffff" : INK;
+    var onWhite = contrast(bg, 1);
+    var onInk = contrast(bg, luminance(INK));
+
+    if (Math.max(onWhite, onInk) >= AA) {
+      return { bg: hex, fg: onWhite >= onInk ? "#ffffff" : INK };
+    }
+
+    for (var t = 0.05; t <= 0.9; t += 0.05) {
+      var deeper = mix(hex, INK_DEEP, t);
+      if (contrast(luminance(deeper), 1) >= AA) return { bg: deeper, fg: "#ffffff" };
+    }
+    return { bg: mix(hex, INK_DEEP, 0.9), fg: "#ffffff" };
   }
 
   function pinIcon(business, category) {
     var number = state.numbers[business.id];
     var digits = String(number).length;
+    var style = numberStyle(category.color);
 
     var svg =
       '<svg class="pin__svg" width="42" height="54" viewBox="0 0 42 54" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
         '<ellipse cx="21" cy="50" rx="9" ry="2.6" fill="#fff" opacity=".85"/>' +
-        '<path d="M21 2a14 14 0 0 1 14 14c0 9.5-14 30-14 30S7 25.5 7 16A14 14 0 0 1 21 2z" fill="' + category.color + '"/>' +
+        '<path d="M21 2a14 14 0 0 1 14 14c0 9.5-14 30-14 30S7 25.5 7 16A14 14 0 0 1 21 2z" fill="' + style.bg + '"/>' +
         '<text x="21" y="' + (digits > 2 ? 20.5 : 21.5) + '" text-anchor="middle" ' +
           'font-family="Fredoka, ui-rounded, system-ui, sans-serif" font-weight="600" ' +
-          'font-size="' + (digits > 2 ? 12 : 16) + '" fill="' + labelColor(category.color) + '">' +
+          'font-size="' + (digits > 2 ? 12 : 16) + '" fill="' + style.fg + '">' +
           number +
         "</text>" +
       "</svg>";
@@ -188,8 +221,8 @@
 
     return (
       '<div class="pop" style="--pop-color:' + category.color + '">' +
-        '<p class="pop__ribbon"><span class="pop__num" style="background:' + category.color +
-          ';color:' + labelColor(category.color) + '">' + state.numbers[business.id] + "</span>" +
+        '<p class="pop__ribbon"><span class="pop__num" style="background:' + numberStyle(category.color).bg +
+          ';color:' + numberStyle(category.color).fg + '">' + state.numbers[business.id] + "</span>" +
           esc(category.label) + "</p>" +
         '<h2 class="pop__name">' + esc(business.name) + "</h2>" +
         '<p class="pop__blurb">' + esc(business.blurb) + "</p>" +
@@ -352,8 +385,9 @@
       var item = document.createElement("li");
       item.className = "card";
       item.dataset.id = business.id;
-      item.style.setProperty("--card-color", category.color);
-      item.style.setProperty("--card-ink", labelColor(category.color));
+      var badge = numberStyle(category.color);
+      item.style.setProperty("--card-color", badge.bg);
+      item.style.setProperty("--card-ink", badge.fg);
       item.tabIndex = 0;
       item.setAttribute("role", "button");
       item.setAttribute("aria-label",
