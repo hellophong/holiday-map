@@ -195,17 +195,17 @@
   }
 
   var PIN_ICON =
-    '<svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">' +
+    '<svg width="16" height="16" viewBox="0 0 12 12" fill="none" aria-hidden="true">' +
     '<path d="M6 1a3.6 3.6 0 0 1 3.6 3.6C9.6 7.1 6 11 6 11S2.4 7.1 2.4 4.6A3.6 3.6 0 0 1 6 1z" ' +
     'stroke="currentColor" stroke-width="1.3"/></svg>';
 
   var CLOCK_ICON =
-    '<svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">' +
+    '<svg width="16" height="16" viewBox="0 0 12 12" fill="none" aria-hidden="true">' +
     '<circle cx="6" cy="6" r="4.6" stroke="currentColor" stroke-width="1.3"/>' +
     '<path d="M6 3.6V6l1.8 1.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
 
   var PHONE_ICON =
-    '<svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">' +
+    '<svg width="16" height="16" viewBox="0 0 12 12" fill="none" aria-hidden="true">' +
     '<path d="M3 1.6h2l1 2.3-1.2.9a7 7 0 0 0 3.4 3.4l.9-1.2 2.3 1v2A1.4 1.4 0 0 1 10 11 8.6 8.6 0 0 1 1 2a1.4 1.4 0 0 1 1.4-1.4z" ' +
     'stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>';
 

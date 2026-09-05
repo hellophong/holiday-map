@@ -469,21 +469,22 @@ a { color: var(--coral-text); }
 }
 
 .pop__details {
-  margin: .55rem 0 0;
-  font-size: .78rem;
+  margin: .7rem 0 0;
+  font-size: 1.17rem;      /* 1.5x — contact details are the point of the card */
+  line-height: 1.35;
   color: var(--ink-soft);
   display: flex;
   flex-direction: column;
-  gap: .18rem;
+  gap: .3rem;
 }
 
 .pop__details span {
   display: flex;
-  align-items: center;
-  gap: .4rem;
+  align-items: flex-start;   /* keep the icon on the first line when text wraps */
+  gap: .5rem;
 }
 
-.pop__details svg { flex: none; opacity: .6; }
+.pop__details svg { flex: none; opacity: .6; margin-top: .2em; }
 
 .leaflet-container a.pop__phone {
   color: inherit;
