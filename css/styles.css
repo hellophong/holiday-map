@@ -469,19 +469,19 @@ a { color: var(--coral-text); }
 }
 
 .pop__details {
-  margin: .7rem 0 0;
-  font-size: 1.17rem;      /* 1.5x — contact details are the point of the card */
+  margin: .65rem 0 0;
+  font-size: .88rem;       /* 1.5x, then eased back 25% */
   line-height: 1.35;
   color: var(--ink-soft);
   display: flex;
   flex-direction: column;
-  gap: .3rem;
+  gap: .25rem;
 }
 
 .pop__details span {
   display: flex;
   align-items: flex-start;   /* keep the icon on the first line when text wraps */
-  gap: .5rem;
+  gap: .42rem;
 }
 
 .pop__details svg { flex: none; opacity: .6; margin-top: .2em; }
