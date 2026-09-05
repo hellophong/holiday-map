@@ -151,8 +151,8 @@
   /* Numbers sit directly on the category colour, and a couple of those — the
      coral and the green — are mid-tone enough that neither white nor deep
      purple reaches AA on them. Where that happens the fill is deepened just
-     until white text clears the threshold. Chips and legend dots keep the
-     palette colour untouched; only the fill under a number moves. */
+     until white text clears the threshold. Chips and legend dots use the same
+     adjusted colour, so a pin and its dot in the legend always match. */
   function numberStyle(hex) {
     var bg = luminance(hex);
     var onWhite = contrast(bg, 1);
@@ -353,7 +353,7 @@
       var chip = document.createElement("button");
       chip.type = "button";
       chip.className = "chip";
-      chip.style.setProperty("--chip-color", category.color);
+      chip.style.setProperty("--chip-color", numberStyle(category.color).bg);
       chip.setAttribute("aria-pressed", "false");
       chip.innerHTML = "<span class='chip__dot' aria-hidden='true'></span>" + esc(category.label);
 
@@ -421,7 +421,7 @@
       var div = L.DomUtil.create("div", "map-legend");
       var items = Object.keys(state.data.categories).map(function (id) {
         var category = state.data.categories[id];
-        return '<li><span class="swatch" style="--swatch:' + category.color + '"></span>' +
+        return '<li><span class="swatch" style="--swatch:' + numberStyle(category.color).bg + '"></span>' +
                esc(category.label) + "</li>";
       });
       div.innerHTML = "<h2>Who's who</h2><ul>" + items.join("") + "</ul>";
