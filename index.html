@@ -3,26 +3,28 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The Merry Mile — Christmas Business Map</title>
-  <meta name="description" content="An illustrated, hand-drawn map of local Christmas shops, bakeries, tree farms and makers." />
+  <title>The 16th Annual Holiday Guide</title>
+  <meta name="description" content="A flat-illustrated map of local Christmas shops, bakeries, tree farms and makers." />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&family=Nunito:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
-
-  <!-- Leaflet 1.9.4 is vendored in vendor/ so the map works offline and without a CDN. -->
+  <!-- Leaflet 1.9.4 and the typefaces are vendored so the map works offline and without a CDN. -->
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
   <link rel="stylesheet" href="css/styles.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎄</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='13' r='9' fill='%23e54b3c'/><rect x='15' y='20' width='2' height='9' fill='%23633d7a'/></svg>" />
 </head>
 <body>
   <div class="snow" aria-hidden="true"></div>
 
   <header class="banner">
-    <div class="banner__garland" aria-hidden="true"></div>
     <div class="banner__inner">
-      <h1 class="banner__title" id="siteTitle">The Merry Mile</h1>
-      <p class="banner__subtitle" id="siteSubtitle">A cozy directory of Christmas shops, makers, and mischief</p>
+      <h1 class="banner__title" id="siteTitle">
+        <span class="banner__lead" id="siteTitleLead">The 16th Annual</span>
+        <span class="banner__main" id="siteTitleMain">Holiday Guide</span>
+      </h1>
+      <p class="banner__subtitle" id="siteSubtitle">Shop Local For Gifts And More</p>
+    </div>
+
+    <div class="banner__scene">
+      <img src="assets/holiday-header2.svg" alt="" aria-hidden="true" width="2062" height="385" />
     </div>
   </header>
 
@@ -30,7 +32,10 @@
     <aside class="sidebar" aria-label="Directory">
       <div class="sidebar__head">
         <label class="search" for="search">
-          <span class="search__icon" aria-hidden="true">🔍</span>
+          <svg class="search__icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="2" />
+            <path d="M11 11l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
           <input id="search" type="search" placeholder="Search the directory…" autocomplete="off" />
         </label>
         <div class="filters" id="filters" role="group" aria-label="Filter by category"></div>
@@ -41,7 +46,7 @@
 
     <div class="map-frame">
       <div id="map" role="application" aria-label="Map of Christmas businesses"></div>
-      <noscript><p class="noscript">This map needs JavaScript to unwrap itself. 🎁</p></noscript>
+      <noscript><p class="noscript">This map needs JavaScript to unwrap itself.</p></noscript>
     </div>
   </main>
 

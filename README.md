@@ -1,8 +1,11 @@
-# 🎄 The Merry Mile
+# 🎄 The 16th Annual Holiday Guide
+
+*Shop Local For Gifts And More.*
 
 An interactive, illustrated map of local Christmas businesses — tree farms, bakeries,
 cocoa counters, toymakers and trim shops — built with [Leaflet](https://leafletjs.com)
-on top of Stadia Maps' hand-painted **Stamen Watercolor** tiles.
+on top of Stadia Maps' hand-painted **Stamen Watercolor** tiles, dressed in a flat
+vector style that follows the illustrated header artwork.
 
 Hover a pin (or a card in the sidebar) and a little paper card unfolds with the
 business name, a short blurb, its address and hours, and a link to their site.
@@ -12,8 +15,9 @@ put it away.
 
 ## Running it
 
-Everything is static — no build step, no dependencies to install. Leaflet 1.9.4
-is vendored in `vendor/` so it works offline. Because the directory is loaded with
+Everything is static — no build step, no dependencies to install. Leaflet 1.9.4 and
+both typefaces (Fredoka, Nunito Sans) are vendored in `vendor/`, so there are no CDN
+or Google Fonts requests and the page works offline. Because the directory is loaded with
 `fetch`, it does need to be served over HTTP rather than opened as a `file://` URL:
 
 ```bash
@@ -62,7 +66,8 @@ business is hard-coded in the HTML or JS. Edit that file and reload.
 ```jsonc
 {
   "meta": {
-    "title": "The Merry Mile",          // banner heading + document title
+    "titleLead": "The 16th Annual",     // small line above the name; omit to drop it
+    "title": "Holiday Guide",           // the name itself, set large
     "subtitle": "…",                    // banner tagline
     "center": [44.4759, -73.2121],      // initial view (the map then fits all pins)
     "zoom": 15,
@@ -71,9 +76,10 @@ business is hard-coded in the HTML or JS. Edit that file and reload.
 
   "categories": {
     "bakery": {                         // key referenced by each business
-      "label": "Bakeries",              // shown on chips, ribbons and the legend
-      "color": "#c0392b",               // colours the pin, card spine and ribbon
-      "emoji": "🍪"                     // rides on the pin
+      "label": "Bakeries",              // shown on chips, cards and the legend
+      "color": "#e54b3c",               // colours the pin and its dot everywhere
+      "icon": "cookie"                  // white glyph drawn inside the pin; one of
+                                        // tree, cookie, cup, star, gift, bauble
     }
   },
 
@@ -96,8 +102,8 @@ business is hard-coded in the HTML or JS. Edit that file and reload.
 
 Append an object to `businesses` with a unique `id`, a `category` that exists in
 `categories`, and `coords` as `[lat, lng]` (right-click a spot in Google Maps to copy
-them in that order). New categories only need a label, a colour and an emoji — the
-filter chips, legend and pin colours all build themselves from that map.
+them in that order). New categories only need a label, a colour and an icon
+name — the filter chips, legend and pin colours all build themselves from that map.
 
 Text from the JSON is HTML-escaped before rendering, so apostrophes and ampersands
 in business names are safe.
@@ -108,19 +114,29 @@ in business names are safe.
 ## What's in the box
 
 ```
-index.html              page shell — banner, sidebar, map frame
-css/styles.css          the cozy bit: parchment, candy-cane trim, snowfall, pins
+index.html              page shell — masthead, illustrated band, sidebar, map frame
+css/styles.css          the flat look: palette, masthead, cards, pins, snowfall
 js/app.js               map setup, pins, hover cards, filtering, search, legend
 data/businesses.json    the directory itself
+assets/holiday-header2.svg   the header illustration (holiday-header.svg is the
+                             earlier crop, kept but unused)
 vendor/leaflet/         Leaflet 1.9.4 (BSD-2-Clause), vendored
+vendor/fonts/           Fredoka + Nunito Sans (SIL OFL), vendored
 ```
+
+The page palette is taken from the header artwork's own swatches — greige `#eae6e2`,
+teal `#9fd0d2`, purple `#633d7a`, coral `#e54b3c`, pink `#e697aa`, gold `#f8a92d`,
+green `#2cac84`, navy `#4d6998` — so the illustration sits flush against the page
+with no visible seam. The band is sized in `vw` so the artwork's figures are never
+cropped, whatever the viewport.
 
 ## Features
 
 - **Illustrated hover cards** that survive the trip from pin to link, plus click-to-pin.
 - **Category filter chips** and a **search box** matching name, blurb, address and category.
 - **Sidebar directory** kept in sync with the map — hover a card to light up its pin.
-- **Custom bauble pins** drawn as inline SVG, coloured per category, with a jingle on select.
+- **Flat vector pins** drawn as inline SVG, coloured per category, each with a white glyph.
 - **Keyboard support** — cards are focusable, `Enter`/`Space` opens a card, `Esc` closes it.
-- **Falling snow** and a candy-cane map frame, both respecting `prefers-reduced-motion`.
-- **Responsive** — the sidebar stacks above the map on narrow screens.
+- **Falling snow**, respecting `prefers-reduced-motion`.
+- **Responsive** — the sidebar stacks above the map on narrow screens and the page scrolls.
+- **AA contrast** on every text/background pair, including the chips and card links.

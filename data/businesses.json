@@ -1,18 +1,46 @@
 {
   "meta": {
-    "title": "The Merry Mile",
-    "subtitle": "A cozy directory of Christmas shops, makers, and mischief",
-    "center": [44.4759, -73.2121],
+    "titleLead": "The 16th Annual",
+    "title": "Holiday Guide",
+    "subtitle": "Shop Local For Gifts And More",
+    "center": [
+      44.4759,
+      -73.2121
+    ],
     "zoom": 15,
     "attributionNote": "Sample data — businesses are fictional."
   },
   "categories": {
-    "tree": { "label": "Tree Farms", "color": "#2f6f4e", "emoji": "🎄" },
-    "bakery": { "label": "Bakeries", "color": "#c0392b", "emoji": "🍪" },
-    "cocoa": { "label": "Cocoa & Cafés", "color": "#8b5a2b", "emoji": "☕" },
-    "toys": { "label": "Toys & Makers", "color": "#b8860b", "emoji": "🧸" },
-    "market": { "label": "Markets", "color": "#7d3c98", "emoji": "🎁" },
-    "decor": { "label": "Trim & Decor", "color": "#1f6f8b", "emoji": "❄️" }
+    "tree": {
+      "label": "Tree Farms",
+      "color": "#2cac84",
+      "icon": "tree"
+    },
+    "bakery": {
+      "label": "Bakeries",
+      "color": "#e54b3c",
+      "icon": "cookie"
+    },
+    "cocoa": {
+      "label": "Cocoa & Cafés",
+      "color": "#633d7a",
+      "icon": "cup"
+    },
+    "toys": {
+      "label": "Toys & Makers",
+      "color": "#f8a92d",
+      "icon": "star"
+    },
+    "market": {
+      "label": "Markets",
+      "color": "#e697aa",
+      "icon": "gift"
+    },
+    "decor": {
+      "label": "Trim & Decor",
+      "color": "#4d6998",
+      "icon": "bauble"
+    }
   },
   "businesses": [
     {
@@ -23,7 +51,10 @@
       "url": "https://example.com/balsam-hollow",
       "address": "412 North Ave",
       "hours": "Fri–Sun, 9am–dusk",
-      "coords": [44.4881, -73.2265]
+      "coords": [
+        44.4881,
+        -73.2265
+      ]
     },
     {
       "id": "sugarplum-bakehouse",
@@ -33,7 +64,10 @@
       "url": "https://example.com/sugarplum",
       "address": "88 Church St",
       "hours": "Daily, 7am–4pm",
-      "coords": [44.4771, -73.2126]
+      "coords": [
+        44.4771,
+        -73.2126
+      ]
     },
     {
       "id": "kettle-kringle",
@@ -43,7 +77,10 @@
       "url": "https://example.com/kettle-kringle",
       "address": "15 College St",
       "hours": "Daily, 8am–9pm",
-      "coords": [44.4796, -73.2149]
+      "coords": [
+        44.4796,
+        -73.2149
+      ]
     },
     {
       "id": "tinsel-tinker",
@@ -53,7 +90,10 @@
       "url": "https://example.com/tinsel-tinker",
       "address": "9 Maple St",
       "hours": "Wed–Sat, 11am–6pm",
-      "coords": [44.4718, -73.2153]
+      "coords": [
+        44.4718,
+        -73.2153
+      ]
     },
     {
       "id": "frost-fair",
@@ -63,7 +103,10 @@
       "url": "https://example.com/frost-fair",
       "address": "City Hall Park",
       "hours": "Thu–Sun, 12pm–8pm",
-      "coords": [44.4759, -73.2118]
+      "coords": [
+        44.4759,
+        -73.2118
+      ]
     },
     {
       "id": "glowworm-lights",
@@ -73,7 +116,10 @@
       "url": "https://example.com/glowworm",
       "address": "230 Pine St",
       "hours": "Tue–Sun, 10am–7pm",
-      "coords": [44.4703, -73.2098]
+      "coords": [
+        44.4703,
+        -73.2098
+      ]
     },
     {
       "id": "nutmeg-nook",
@@ -83,7 +129,10 @@
       "url": "https://example.com/nutmeg-nook",
       "address": "51 Main St",
       "hours": "Mon–Sat, 9am–5pm",
-      "coords": [44.4762, -73.2178]
+      "coords": [
+        44.4762,
+        -73.2178
+      ]
     },
     {
       "id": "silver-bells",
@@ -93,7 +142,10 @@
       "url": "https://example.com/silver-bells",
       "address": "3 Bank St",
       "hours": "Daily, 10am–6pm",
-      "coords": [44.4782, -73.2143]
+      "coords": [
+        44.4782,
+        -73.2143
+      ]
     },
     {
       "id": "wassail-works",
@@ -103,7 +155,10 @@
       "url": "https://example.com/wassail-works",
       "address": "144 Battery St",
       "hours": "Wed–Sun, 3pm–10pm",
-      "coords": [44.4805, -73.2205]
+      "coords": [
+        44.4805,
+        -73.2205
+      ]
     },
     {
       "id": "reindeer-rest",
@@ -113,7 +168,10 @@
       "url": "https://example.com/reindeer-rest",
       "address": "700 Riverside Ave",
       "hours": "Sat–Sun, 10am–4pm",
-      "coords": [44.4836, -73.2003]
+      "coords": [
+        44.4836,
+        -73.2003
+      ]
     },
     {
       "id": "paper-partridge",
@@ -123,7 +181,10 @@
       "url": "https://example.com/paper-partridge",
       "address": "27 Cherry St",
       "hours": "Tue–Sat, 10am–6pm",
-      "coords": [44.4788, -73.2101]
+      "coords": [
+        44.4788,
+        -73.2101
+      ]
     },
     {
       "id": "mistletoe-mercantile",
@@ -133,7 +194,10 @@
       "url": "https://example.com/mistletoe",
       "address": "62 King St",
       "hours": "Daily, 11am–7pm",
-      "coords": [44.4736, -73.2189]
+      "coords": [
+        44.4736,
+        -73.2189
+      ]
     }
   ]
 }

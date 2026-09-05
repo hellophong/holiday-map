@@ -105,41 +105,80 @@
 
   /* --------------------------- Pins ---------------------------- */
 
+  /* Flat vector glyphs, drawn white inside the pin's head. Keyed by the
+     category's "icon" in the JSON so new categories can pick one. */
+  var GLYPHS = {
+    tree:
+      '<path d="M21 8l4.5 6.5h-9z" fill="#fff"/>' +
+      '<path d="M21 12.5l6 8h-12z" fill="#fff"/>' +
+      '<rect x="20" y="19.5" width="2" height="3" fill="#fff"/>',
+    cookie:
+      '<circle cx="21" cy="15" r="6.5" fill="#fff"/>' +
+      '<circle cx="19" cy="13" r="1.3" fill="{c}"/>' +
+      '<circle cx="23.2" cy="14.6" r="1.1" fill="{c}"/>' +
+      '<circle cx="20.4" cy="17.6" r="1.2" fill="{c}"/>',
+    cup:
+      '<path d="M15.5 10.5h9v5.5a4.5 4.5 0 0 1-9 0z" fill="#fff"/>' +
+      '<path d="M24.7 12h1.6a1.9 1.9 0 0 1 0 3.8h-1.6" stroke="#fff" stroke-width="1.5" fill="none"/>' +
+      '<rect x="14.3" y="20.6" width="11.4" height="1.8" rx=".9" fill="#fff"/>',
+    star:
+      '<path d="M21 8.4l2 4.2 4.6.7-3.3 3.2.8 4.5-4.1-2.2-4.1 2.2.8-4.5-3.3-3.2 4.6-.7z" fill="#fff"/>',
+    gift:
+      '<rect x="14.6" y="13.4" width="12.8" height="8.6" rx="1" fill="#fff"/>' +
+      '<rect x="19.8" y="13.4" width="2.4" height="8.6" fill="{c}"/>' +
+      '<path d="M21 13.2c-1.7-3.3-5.4-1.8-3.4.7M21 13.2c1.7-3.3 5.4-1.8 3.4.7" stroke="#fff" stroke-width="1.5" fill="none"/>',
+    bauble:
+      '<circle cx="21" cy="16.2" r="6.2" fill="#fff"/>' +
+      '<rect x="19.4" y="8.2" width="3.2" height="2.8" rx=".7" fill="#fff"/>' +
+      '<path d="M21 11v1.8" stroke="#fff" stroke-width="1.4"/>' +
+      '<path d="M15.7 14.8c3.4 1.9 6.8 1.9 10.6 0" stroke="{c}" stroke-width="1.4" fill="none"/>'
+  };
+
   function pinIcon(business, category) {
-    /* A hand-drawn bauble hanging from a little cap, drawn inline so the
-       colour can follow the category without shipping a dozen images. */
+    /* A flat teardrop standing on a little patch of snow — no outline, no
+       gradient, no drop shadow, matching the illustration style. */
+    var glyph = (GLYPHS[category.icon] || GLYPHS.bauble).replace(/\{c\}/g, category.color);
+
     var svg =
-      '<svg class="pin__svg" width="44" height="56" viewBox="0 0 44 56" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-        '<path d="M22 55 C21 47 20 44 20 41" stroke="#4a3226" stroke-width="2.5" stroke-linecap="round" fill="none"/>' +
-        '<circle cx="22" cy="22" r="17" fill="' + category.color + '" stroke="#4a3226" stroke-width="2.5"/>' +
-        '<path d="M8 15 Q22 24 36 15" stroke="rgba(255,255,255,.55)" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
-        '<rect x="16" y="1.5" width="12" height="7" rx="2.5" fill="#d9a441" stroke="#4a3226" stroke-width="2.5"/>' +
-        '<text x="22" y="28" font-size="16" text-anchor="middle">' + category.emoji + "</text>" +
+      '<svg class="pin__svg" width="42" height="54" viewBox="0 0 42 54" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+        '<ellipse cx="21" cy="50" rx="9" ry="2.6" fill="#fff" opacity=".85"/>' +
+        '<path d="M21 2a14 14 0 0 1 14 14c0 9.5-14 30-14 30S7 25.5 7 16A14 14 0 0 1 21 2z" fill="' + category.color + '"/>' +
+        glyph +
       "</svg>";
 
     return L.divIcon({
       className: "pin",
       html: svg,
-      iconSize: [44, 56],
-      iconAnchor: [22, 54],
-      popupAnchor: [0, -44]
+      iconSize: [42, 54],
+      iconAnchor: [21, 50],
+      popupAnchor: [0, -42]
     });
   }
 
+  var PIN_ICON =
+    '<svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">' +
+    '<path d="M6 1a3.6 3.6 0 0 1 3.6 3.6C9.6 7.1 6 11 6 11S2.4 7.1 2.4 4.6A3.6 3.6 0 0 1 6 1z" ' +
+    'stroke="currentColor" stroke-width="1.3"/></svg>';
+
+  var CLOCK_ICON =
+    '<svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">' +
+    '<circle cx="6" cy="6" r="4.6" stroke="currentColor" stroke-width="1.3"/>' +
+    '<path d="M6 3.6V6l1.8 1.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+
   function popupHtml(business, category) {
     var details = [];
-    if (business.address) details.push('<span>📍 ' + esc(business.address) + "</span>");
-    if (business.hours) details.push('<span>🕰️ ' + esc(business.hours) + "</span>");
+    if (business.address) details.push("<span>" + PIN_ICON + esc(business.address) + "</span>");
+    if (business.hours) details.push("<span>" + CLOCK_ICON + esc(business.hours) + "</span>");
 
     return (
       '<div class="pop" style="--pop-color:' + category.color + '">' +
-        '<span class="pop__ribbon">' + category.emoji + " " + esc(category.label) + "</span>" +
+        '<p class="pop__ribbon"><span class="pop__dot"></span>' + esc(category.label) + "</p>" +
         '<h2 class="pop__name">' + esc(business.name) + "</h2>" +
         '<p class="pop__blurb">' + esc(business.blurb) + "</p>" +
         (details.length ? '<p class="pop__details">' + details.join("") + "</p>" : "") +
         (business.url
           ? '<a class="pop__link" href="' + esc(business.url) + '" target="_blank" rel="noopener noreferrer">' +
-              "Visit their site →</a>"
+              "Visit their site</a>"
           : "") +
       "</div>"
     );
@@ -265,7 +304,7 @@
       chip.className = "chip";
       chip.style.setProperty("--chip-color", category.color);
       chip.setAttribute("aria-pressed", "false");
-      chip.innerHTML = "<span aria-hidden='true'>" + category.emoji + "</span>" + esc(category.label);
+      chip.innerHTML = "<span class='chip__dot' aria-hidden='true'></span>" + esc(category.label);
 
       chip.addEventListener("click", function () {
         if (state.filters.has(id)) state.filters.delete(id);
@@ -285,7 +324,7 @@
     if (!businesses.length) {
       var empty = document.createElement("li");
       empty.className = "cards__empty";
-      empty.textContent = "Nothing under the tree for that one. 🎁";
+      empty.textContent = "Nothing under the tree for that one.";
       host.appendChild(empty);
       return;
     }
@@ -301,7 +340,7 @@
       item.setAttribute("aria-label", "Show " + business.name + " on the map");
 
       item.innerHTML =
-        '<p class="card__meta">' + category.emoji + " " + esc(category.label) + "</p>" +
+        '<p class="card__meta"><span class="card__dot" aria-hidden="true"></span>' + esc(category.label) + "</p>" +
         '<h2 class="card__name">' + esc(business.name) + "</h2>" +
         '<p class="card__blurb">' + esc(business.blurb) + "</p>" +
         (business.url
@@ -336,7 +375,7 @@
       var items = Object.keys(state.data.categories).map(function (id) {
         var category = state.data.categories[id];
         return '<li><span class="swatch" style="--swatch:' + category.color + '"></span>' +
-               category.emoji + " " + esc(category.label) + "</li>";
+               esc(category.label) + "</li>";
       });
       div.innerHTML = "<h2>Who's who</h2><ul>" + items.join("") + "</ul>";
       L.DomEvent.disableClickPropagation(div);
@@ -353,7 +392,7 @@
       var category = state.data.categories[business.category];
       if (!category) {
         console.warn('Unknown category "' + business.category + '" on ' + business.name);
-        category = { label: business.category, color: "#2f6f4e", emoji: "🎄" };
+        category = { label: business.category, color: "#2cac84", icon: "bauble" };
       }
 
       var marker = L.marker(business.coords, {
@@ -390,10 +429,16 @@
 
   function hydrateChrome() {
     var meta = state.data.meta || {};
-    if (meta.title) {
-      document.getElementById("siteTitle").textContent = meta.title;
-      document.title = meta.title + " — Christmas Business Map";
-    }
+    var lead = document.getElementById("siteTitleLead");
+
+    if (meta.titleLead) lead.textContent = meta.titleLead;
+    else lead.remove();
+
+    if (meta.title) document.getElementById("siteTitleMain").textContent = meta.title;
+
+    var fullTitle = [meta.titleLead, meta.title].filter(Boolean).join(" ");
+    if (fullTitle) document.title = fullTitle;
+
     if (meta.subtitle) document.getElementById("siteSubtitle").textContent = meta.subtitle;
     document.getElementById("sidebarNote").textContent =
       meta.attributionNote || "Hover a pin or a card to peek inside.";
