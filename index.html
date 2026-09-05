@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Merry Mile — Christmas Business Map</title>
+  <meta name="description" content="An illustrated, hand-drawn map of local Christmas shops, bakeries, tree farms and makers." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&family=Nunito:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <!-- Leaflet 1.9.4 is vendored in vendor/ so the map works offline and without a CDN. -->
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎄</text></svg>" />
+</head>
+<body>
+  <div class="snow" aria-hidden="true"></div>
+
+  <header class="banner">
+    <div class="banner__garland" aria-hidden="true"></div>
+    <div class="banner__inner">
+      <h1 class="banner__title" id="siteTitle">The Merry Mile</h1>
+      <p class="banner__subtitle" id="siteSubtitle">A cozy directory of Christmas shops, makers, and mischief</p>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar" aria-label="Directory">
+      <div class="sidebar__head">
+        <label class="search" for="search">
+          <span class="search__icon" aria-hidden="true">🔍</span>
+          <input id="search" type="search" placeholder="Search the directory…" autocomplete="off" />
+        </label>
+        <div class="filters" id="filters" role="group" aria-label="Filter by category"></div>
+      </div>
+      <ul class="cards" id="cards"></ul>
+      <p class="sidebar__note" id="sidebarNote"></p>
+    </aside>
+
+    <div class="map-frame">
+      <div id="map" role="application" aria-label="Map of Christmas businesses"></div>
+      <noscript><p class="noscript">This map needs JavaScript to unwrap itself. 🎁</p></noscript>
+    </div>
+  </main>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
