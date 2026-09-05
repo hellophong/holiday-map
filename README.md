@@ -69,8 +69,8 @@ business is hard-coded in the HTML or JS. Edit that file and reload.
     "titleLead": "The 16th Annual",     // small line above the name; omit to drop it
     "title": "Holiday Guide",           // the name itself, set large
     "subtitle": "…",                    // banner tagline
-    "center": [44.4759, -73.2121],      // initial view (the map then fits all pins)
-    "zoom": 15,
+    "center": [37.5918, -77.5200],      // the opening view, used as given
+    "zoom": 11,
     "attributionNote": "…"              // small print at the foot of the sidebar
   },
 
@@ -144,5 +144,8 @@ cropped, whatever the viewport.
 - **Flat vector pins** drawn as inline SVG, coloured per category, numbered to match the list.
 - **Keyboard support** — cards are focusable, `Enter`/`Space` opens a card, `Esc` closes it.
 - **Falling snow**, respecting `prefers-reduced-motion`.
+- **Opens where the guide lives** — `meta.center` and `meta.zoom` set the view as given,
+  rather than fitting every pin: listings out in Louisa and on the Northern Neck would
+  otherwise pull the map back a hundred miles and squash the Richmond cluster.
 - **Responsive** — the sidebar stacks above the map on narrow screens and the page scrolls.
 - **AA contrast** on every text/background pair, including the chips and card links.

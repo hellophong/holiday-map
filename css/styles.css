@@ -28,6 +28,13 @@
 
 @font-face {
   font-family: "Nunito Sans";
+  src: url("../vendor/fonts/nunito-sans-latin-500-normal.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nunito Sans";
   src: url("../vendor/fonts/nunito-sans-latin-700-normal.woff2") format("woff2");
   font-weight: 700;
   font-display: swap;
@@ -470,8 +477,9 @@ a { color: var(--coral-text); }
 
 .pop__details {
   margin: .65rem 0 0;
-  font-size: .88rem;       /* 1.5x, then eased back 25% */
-  line-height: 1.35;
+  font-size: .855rem;      /* matches the blurb; medium weight carries the emphasis */
+  font-weight: 500;
+  line-height: 1.4;
   color: var(--ink-soft);
   display: flex;
   flex-direction: column;

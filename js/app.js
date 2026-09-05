@@ -469,11 +469,6 @@
     });
   }
 
-  function fitToBusinesses() {
-    var coords = state.data.businesses.map(function (b) { return b.coords; });
-    if (coords.length) map.fitBounds(L.latLngBounds(coords).pad(0.18));
-  }
-
   function hydrateChrome() {
     var meta = state.data.meta || {};
     var lead = document.getElementById("siteTitleLead");
@@ -502,9 +497,13 @@
     state.data = data;
     var meta = data.meta || {};
 
+    /* The opening view comes from meta.center/meta.zoom rather than fitting
+       every pin: listings out in Louisa and on the Northern Neck would pull the
+       view back a hundred miles and squash the Richmond cluster, where most of
+       the guide is. */
     map = L.map("map", {
-      center: meta.center || [44.4759, -73.2121],
-      zoom: meta.zoom || 15,
+      center: meta.center || [37.5407, -77.4360],
+      zoom: meta.zoom || 11,
       scrollWheelZoom: true,
       zoomControl: true
     });
@@ -516,7 +515,6 @@
     buildMarkers();
     renderCards(orderedBusinesses());
     addLegend();
-    fitToBusinesses();
     wireSearch();
 
     /* Clicking the paper itself puts the pinned card away. */
