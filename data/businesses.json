@@ -66,6 +66,32 @@
         37.515681,
         -77.469732
       ]
+    },
+    {
+      "id": "world-of-mirth",
+      "name": "World of Mirth",
+      "category": "toys",
+      "blurb": "Jellycat's Letter to Santa is a polar explorer on a quest for the Northern Lights, camera and flask of cocoa at the ready. Any message to Santa gets her stamp of approval.",
+      "url": "https://worldofmirth.com",
+      "address": "3005 W. Cary St.",
+      "phone": "804-353-8991",
+      "coords": [
+        37.5537,
+        -77.4795
+      ]
+    },
+    {
+      "id": "whitleys-peanut-factory",
+      "name": "Whitley's Peanut Factory",
+      "category": "gifts",
+      "blurb": "Nearly 40 years of handcrafted snacks and treats, serving Richmond since 2017. Small-batch Virginia peanuts, confections and mixes, with custom assortments for gifting or stocking up for gatherings.",
+      "url": "https://whitleyspeanut.com",
+      "address": "4101 Dominion Blvd.",
+      "phone": "804-747-3300",
+      "coords": [
+        37.6572,
+        -77.5439
+      ]
     }
   ]
 }
