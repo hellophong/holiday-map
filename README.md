@@ -105,7 +105,8 @@ them in that order). New categories need only a label and a colour — the filte
 chips, legend and pin colours all build themselves from that map. The number label
 inside a pin is set to white or deep purple automatically, whichever reads better on
 that colour; if neither clears 4.5:1, the fill under the number is deepened until white
-does. Chips and legend dots always show the palette colour as given.
+does. Chips and legend dots use that same adjusted colour, so a pin always matches its
+dot in the legend.
 
 Text from the JSON is HTML-escaped before rendering, so apostrophes and ampersands
 in business names are safe.
