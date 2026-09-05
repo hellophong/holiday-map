@@ -110,8 +110,8 @@ does. Chips and legend dots always show the palette colour as given.
 Text from the JSON is HTML-escaped before rendering, so apostrophes and ampersands
 in business names are safe.
 
-> The directory currently holds two real Richmond-area listings. Add the rest the
-> same way — one object per business.
+> The directory currently holds eleven real listings around Richmond. Add the rest
+> the same way — one object per business.
 
 ## What's in the box
 

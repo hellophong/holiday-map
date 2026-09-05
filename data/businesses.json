@@ -104,6 +104,98 @@
         37.6572,
         -77.5439
       ]
+    },
+    {
+      "id": "mary-angelas-pizzeria",
+      "name": "Mary Angela's Pizzeria",
+      "category": "dining",
+      "blurb": "Thirty-nine years in the heart of Carytown: New York style and Sicilian pizzas, pasta and subs, with a gluten-free crust and vegetarian options. Gift cards available, and catering for holiday luncheons and corporate events.",
+      "url": "https://maryangelaspizzeria.com",
+      "address": "3345 W. Cary St.",
+      "phone": "804-353-2333",
+      "coords": [
+        37.55466277183648,
+        -77.48413712395379
+      ]
+    },
+    {
+      "id": "meadowgate-alpacas",
+      "name": "Meadowgate Alpacas",
+      "category": "outings",
+      "blurb": "A family-run alpaca farm with exceptionally friendly animals, offering on-site farm visits and appearances at weddings, college campuses and corporate events. Fiber harvested annually becomes clothing and housewares.",
+      "url": "https://meadowgatealpacas.com",
+      "address": "16305 Coatesville Road",
+      "phone": "804-432-3572",
+      "coords": [
+        37.85447358497333,
+        -77.60923723439232
+      ]
+    },
+    {
+      "id": "aaa-discount-floors",
+      "name": "AAA Discount Floors & Services, Inc.",
+      "category": "services",
+      "blurb": "“Richmond's Best Kept Secret” — family-owned and operated for over 45 years, with thousands of flooring options in stock across a 12,000-square-foot showroom and thousands more available by special order.",
+      "url": "https://aaadiscountfloorsrva.com",
+      "address": "4110 W. Clay St.",
+      "phone": "804-353-3337",
+      "hours": "Mon–Fri 10am–5pm; Sat 10am–2pm",
+      "coords": [
+        37.577002161543774,
+        -77.48329846950986
+      ]
+    },
+    {
+      "id": "53rd-winery",
+      "name": "53rd Winery",
+      "category": "dining",
+      "blurb": "Award-winning wines and peaceful country charm a short drive from Richmond. Check the website for weekend events, special tastings and new releases.",
+      "url": "https://53rdwinery.com",
+      "address": "13372 Shannon Hill Road, Louisa",
+      "phone": "540-894-1536",
+      "coords": [
+        37.96047009210349,
+        -77.923540137971
+      ]
+    },
+    {
+      "id": "covington-travel",
+      "name": "Covington Travel",
+      "category": "services",
+      "blurb": "Fifty-eight years of global travel expertise, crafting personalized itineraries from business trips to dream vacations. Insider knowledge and global connections handle the details so you can focus on the adventure.",
+      "url": "https://covingtontravel.com",
+      "address": "4800 Cox Road, Suite 200, Glen Allen",
+      "phone": "804-747-7077",
+      "coords": [
+        37.66782455855036,
+        -77.57069833976253
+      ]
+    },
+    {
+      "id": "byrd-theatre",
+      "name": "The Byrd Theatre",
+      "category": "outings",
+      "blurb": "Richmond's grand movie palace, showing films since 1928 — cult classics, family favorites and classic cinema on the silver screen. Owned and operated by the Byrd Theatre Foundation, a 501(c)(3) nonprofit.",
+      "url": "https://byrdtheatre.org",
+      "address": "2908 W. Cary St.",
+      "phone": "804-358-3056",
+      "coords": [
+        37.55246419337259,
+        -77.47753257671893
+      ]
+    },
+    {
+      "id": "fort",
+      "name": "FORT",
+      "category": "toys",
+      "blurb": "Open-ended, sensory-rich loose play parts that inspire imagination, from in-house collections to a curation of more than 150 brands from around the world.",
+      "url": "https://fortshop.com",
+      "address": "5714 Grove Ave.",
+      "phone": "804-414-6026",
+      "coords": [
+        37.57340507016313,
+        -77.51789699524976
+      ]
     }
   ]
 }
