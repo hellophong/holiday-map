@@ -13,40 +13,38 @@
   "categories": {
     "tree": {
       "label": "Tree Farms",
-      "color": "#2cac84",
-      "icon": "tree"
+      "color": "#2cac84"
     },
     "bakery": {
       "label": "Bakeries",
-      "color": "#e54b3c",
-      "icon": "cookie"
+      "color": "#e54b3c"
     },
     "cocoa": {
       "label": "Cocoa & Cafés",
-      "color": "#633d7a",
-      "icon": "cup"
+      "color": "#633d7a"
     },
     "toys": {
       "label": "Toys & Makers",
-      "color": "#f8a92d",
-      "icon": "star"
+      "color": "#f8a92d"
     },
     "market": {
       "label": "Markets",
-      "color": "#e697aa",
-      "icon": "gift"
+      "color": "#e697aa"
+    },
+    "gifts": {
+      "label": "Gifts & Shops",
+      "color": "#24536f"
     },
     "decor": {
       "label": "Trim & Decor",
-      "color": "#4d6998",
-      "icon": "bauble"
+      "color": "#4d6998"
     }
   },
   "businesses": [
     {
       "id": "stratford-hall",
       "name": "Stratford Hall Historic Preserve",
-      "category": "market",
+      "category": "gifts",
       "blurb": "The gift shop carries sweaters, books, kitchenware and stuffed animals with real historic character, plus custom gift baskets of premium jams, nuts, handmade ornaments, Edwards petite country ham and Stratford Hall grits milled on site in the 1738 gristmill.",
       "url": "https://stratfordhall.org",
       "address": "483 Great House Road, Stratford",

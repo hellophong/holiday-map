@@ -77,9 +77,7 @@ business is hard-coded in the HTML or JS. Edit that file and reload.
   "categories": {
     "bakery": {                         // key referenced by each business
       "label": "Bakeries",              // shown on chips, cards and the legend
-      "color": "#e54b3c",               // colours the pin and its dot everywhere
-      "icon": "cookie"                  // white glyph drawn inside the pin; one of
-                                        // tree, cookie, cup, star, gift, bauble
+      "color": "#e54b3c"                // colours the pin, its number badge and dot
     }
   },
 
@@ -103,8 +101,10 @@ business is hard-coded in the HTML or JS. Edit that file and reload.
 
 Append an object to `businesses` with a unique `id`, a `category` that exists in
 `categories`, and `coords` as `[lat, lng]` (right-click a spot in Google Maps to copy
-them in that order). New categories only need a label, a colour and an icon
-name — the filter chips, legend and pin colours all build themselves from that map.
+them in that order). New categories need only a label and a colour — the filter
+chips, legend and pin colours all build themselves from that map. The number label
+inside each pin is set to white or deep purple automatically, whichever reads better
+on that colour.
 
 Text from the JSON is HTML-escaped before rendering, so apostrophes and ampersands
 in business names are safe.
@@ -132,10 +132,14 @@ cropped, whatever the viewport.
 
 ## Features
 
+- **Numbered directory** — the sidebar lists business names in alphabetical order, each
+  with a number that matches its pin. Numbers are assigned once across the whole
+  directory, so filtering and searching hide rows without renumbering anything.
+- **Details on hover** — the blurb, address, phone and link live in the card that opens
+  when you hover a pin (or a row in the list), not in the sidebar.
 - **Illustrated hover cards** that survive the trip from pin to link, plus click-to-pin.
 - **Category filter chips** and a **search box** matching name, blurb, address and category.
-- **Sidebar directory** kept in sync with the map — hover a card to light up its pin.
-- **Flat vector pins** drawn as inline SVG, coloured per category, each with a white glyph.
+- **Flat vector pins** drawn as inline SVG, coloured per category, numbered to match the list.
 - **Keyboard support** — cards are focusable, `Enter`/`Space` opens a card, `Esc` closes it.
 - **Falling snow**, respecting `prefers-reduced-motion`.
 - **Responsive** — the sidebar stacks above the map on narrow screens and the page scrolls.

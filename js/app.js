@@ -18,6 +18,7 @@
   var state = {
     data: null,
     markers: {},          // id -> L.Marker
+    numbers: {},          // id -> directory number (alphabetical, stable)
     activeId: null,       // pinned (clicked) business
     hoverId: null,        // business under the cursor
     filters: new Set(),   // empty === show everything
@@ -93,45 +94,62 @@
 
   /* --------------------------- Pins ---------------------------- */
 
-  /* Flat vector glyphs, drawn white inside the pin's head. Keyed by the
-     category's "icon" in the JSON so new categories can pick one. */
-  var GLYPHS = {
-    tree:
-      '<path d="M21 8l4.5 6.5h-9z" fill="#fff"/>' +
-      '<path d="M21 12.5l6 8h-12z" fill="#fff"/>' +
-      '<rect x="20" y="19.5" width="2" height="3" fill="#fff"/>',
-    cookie:
-      '<circle cx="21" cy="15" r="6.5" fill="#fff"/>' +
-      '<circle cx="19" cy="13" r="1.3" fill="{c}"/>' +
-      '<circle cx="23.2" cy="14.6" r="1.1" fill="{c}"/>' +
-      '<circle cx="20.4" cy="17.6" r="1.2" fill="{c}"/>',
-    cup:
-      '<path d="M15.5 10.5h9v5.5a4.5 4.5 0 0 1-9 0z" fill="#fff"/>' +
-      '<path d="M24.7 12h1.6a1.9 1.9 0 0 1 0 3.8h-1.6" stroke="#fff" stroke-width="1.5" fill="none"/>' +
-      '<rect x="14.3" y="20.6" width="11.4" height="1.8" rx=".9" fill="#fff"/>',
-    star:
-      '<path d="M21 8.4l2 4.2 4.6.7-3.3 3.2.8 4.5-4.1-2.2-4.1 2.2.8-4.5-3.3-3.2 4.6-.7z" fill="#fff"/>',
-    gift:
-      '<rect x="14.6" y="13.4" width="12.8" height="8.6" rx="1" fill="#fff"/>' +
-      '<rect x="19.8" y="13.4" width="2.4" height="8.6" fill="{c}"/>' +
-      '<path d="M21 13.2c-1.7-3.3-5.4-1.8-3.4.7M21 13.2c1.7-3.3 5.4-1.8 3.4.7" stroke="#fff" stroke-width="1.5" fill="none"/>',
-    bauble:
-      '<circle cx="21" cy="16.2" r="6.2" fill="#fff"/>' +
-      '<rect x="19.4" y="8.2" width="3.2" height="2.8" rx=".7" fill="#fff"/>' +
-      '<path d="M21 11v1.8" stroke="#fff" stroke-width="1.4"/>' +
-      '<path d="M15.7 14.8c3.4 1.9 6.8 1.9 10.6 0" stroke="{c}" stroke-width="1.4" fill="none"/>'
-  };
+  /* Every listing carries a number, assigned once over the whole directory in
+     alphabetical order. Filtering and searching hide rows but never renumber
+     them, so the number beside a name always matches the pin on the map. */
+  function assignNumbers() {
+    state.data.businesses
+      .slice()
+      .sort(function (a, b) { return a.name.localeCompare(b.name); })
+      .forEach(function (business, index) {
+        state.numbers[business.id] = index + 1;
+      });
+  }
+
+  function orderedBusinesses() {
+    return state.data.businesses.slice().sort(function (a, b) {
+      return state.numbers[a.id] - state.numbers[b.id];
+    });
+  }
+
+  /* The numbers sit on the category colour, which ranges from a pale pink to a
+     deep blue, so the label colour is chosen per category rather than fixed. */
+  function luminance(hex) {
+    var n = parseInt(hex.slice(1), 16);
+    return [16, 8, 0]
+      .map(function (shift, i) {
+        var c = ((n >> shift) & 255) / 255;
+        c = c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+        return c * [0.2126, 0.7152, 0.0722][i];
+      })
+      .reduce(function (a, b) { return a + b; }, 0);
+  }
+
+  function contrast(a, b) {
+    var hi = Math.max(a, b), lo = Math.min(a, b);
+    return (hi + 0.05) / (lo + 0.05);
+  }
+
+  var INK = "#3e2a56";
+
+  function labelColor(hex) {
+    var bg = luminance(hex);
+    return contrast(bg, 1) >= contrast(bg, luminance(INK)) ? "#ffffff" : INK;
+  }
 
   function pinIcon(business, category) {
-    /* A flat teardrop standing on a little patch of snow — no outline, no
-       gradient, no drop shadow, matching the illustration style. */
-    var glyph = (GLYPHS[category.icon] || GLYPHS.bauble).replace(/\{c\}/g, category.color);
+    var number = state.numbers[business.id];
+    var digits = String(number).length;
 
     var svg =
       '<svg class="pin__svg" width="42" height="54" viewBox="0 0 42 54" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
         '<ellipse cx="21" cy="50" rx="9" ry="2.6" fill="#fff" opacity=".85"/>' +
         '<path d="M21 2a14 14 0 0 1 14 14c0 9.5-14 30-14 30S7 25.5 7 16A14 14 0 0 1 21 2z" fill="' + category.color + '"/>' +
-        glyph +
+        '<text x="21" y="' + (digits > 2 ? 20.5 : 21.5) + '" text-anchor="middle" ' +
+          'font-family="Fredoka, ui-rounded, system-ui, sans-serif" font-weight="600" ' +
+          'font-size="' + (digits > 2 ? 12 : 16) + '" fill="' + labelColor(category.color) + '">' +
+          number +
+        "</text>" +
       "</svg>";
 
     return L.divIcon({
@@ -170,7 +188,9 @@
 
     return (
       '<div class="pop" style="--pop-color:' + category.color + '">' +
-        '<p class="pop__ribbon"><span class="pop__dot"></span>' + esc(category.label) + "</p>" +
+        '<p class="pop__ribbon"><span class="pop__num" style="background:' + category.color +
+          ';color:' + labelColor(category.color) + '">' + state.numbers[business.id] + "</span>" +
+          esc(category.label) + "</p>" +
         '<h2 class="pop__name">' + esc(business.name) + "</h2>" +
         '<p class="pop__blurb">' + esc(business.blurb) + "</p>" +
         (details.length ? '<p class="pop__details">' + details.join("") + "</p>" : "") +
@@ -270,7 +290,7 @@
   }
 
   function applyFilters() {
-    var visible = state.data.businesses.filter(isVisible);
+    var visible = orderedBusinesses().filter(isVisible);
     var visibleIds = new Set(visible.map(function (b) { return b.id; }));
 
     state.data.businesses.forEach(function (business) {
@@ -333,25 +353,20 @@
       item.className = "card";
       item.dataset.id = business.id;
       item.style.setProperty("--card-color", category.color);
+      item.style.setProperty("--card-ink", labelColor(category.color));
       item.tabIndex = 0;
       item.setAttribute("role", "button");
-      item.setAttribute("aria-label", "Show " + business.name + " on the map");
+      item.setAttribute("aria-label",
+        business.name + ", number " + state.numbers[business.id] + ", " + category.label +
+        ". Show on the map.");
 
       item.innerHTML =
-        '<p class="card__meta"><span class="card__dot" aria-hidden="true"></span>' + esc(category.label) + "</p>" +
-        '<h2 class="card__name">' + esc(business.name) + "</h2>" +
-        '<p class="card__blurb">' + esc(business.blurb) + "</p>" +
-        (business.url
-          ? '<a class="card__link" href="' + esc(business.url) +
-            '" target="_blank" rel="noopener noreferrer">Visit their site →</a>'
-          : "");
+        '<span class="card__num" aria-hidden="true">' + state.numbers[business.id] + "</span>" +
+        '<span class="card__name">' + esc(business.name) + "</span>";
 
       item.addEventListener("mouseenter", function () { showCard(business.id); });
       item.addEventListener("mouseleave", function () { scheduleClose(business.id); });
-      item.addEventListener("click", function (event) {
-        if (event.target.closest("a")) return; // let the link do its job
-        pinCard(business.id);
-      });
+      item.addEventListener("click", function () { pinCard(business.id); });
       item.addEventListener("keydown", function (event) {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
@@ -461,10 +476,11 @@
     });
 
     addTiles();
+    assignNumbers();
     hydrateChrome();
     renderFilters();
     buildMarkers();
-    renderCards(data.businesses);
+    renderCards(orderedBusinesses());
     addLegend();
     fitToBusinesses();
     wireSearch();
