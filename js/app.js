@@ -39,45 +39,68 @@
       '&copy; <a href="https://openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> ' +
       '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
 
+    /* Watercolor is only painted as deep as z16. maxNativeZoom lets Leaflet
+       upscale those tiles past that instead of hiding the layer, so zooming
+       in doesn't strand the labels on blank paper. */
     var watercolor = L.tileLayer(key("https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg"), {
       minZoom: 1,
-      maxZoom: 16,
+      maxNativeZoom: 16,
+      maxZoom: 18,
       attribution: attribution
     }).addTo(map);
 
-    watercolor.on("tileerror", warnAboutTiles);
+    watercolor.on("tileload", onTileLoad);
+    watercolor.on("tileerror", onTileError);
 
     /* Watercolor has no lettering of its own — this overlay puts the
        street and place names back on top without spoiling the paint. */
     L.tileLayer(key("https://tiles.stadiamaps.com/tiles/stamen_terrain_labels/{z}/{x}/{y}{r}.png"), {
       minZoom: 1,
+      maxNativeZoom: 18,
       maxZoom: 18,
       opacity: 0.85,
       attribution: ""
     }).addTo(map);
   }
 
-  var warnedAboutTiles = false;
+  /* ----------------------- Tile health notice --------------------- */
+  /* A single failed tile at the edge of the view is just noise. Only say
+     something once several requests have failed AND nothing has painted at
+     all — that pattern means the layer is being refused outright, not that
+     one request got unlucky. */
 
-  function warnAboutTiles() {
-    /* Stadia serves watercolor key-free on localhost only; anywhere else a
-       missing key comes back as a 401 and the paper stays blank. Say so
-       rather than leaving people staring at an empty page. */
-    if (warnedAboutTiles) return;
-    warnedAboutTiles = true;
+  var TILE_ERROR_THRESHOLD = 3;
+  var tileErrors = 0;
+  var tilesPainted = 0;
+  var tileWarning = null;
 
-    var note = L.control({ position: "topright" });
-    note.onAdd = function () {
+  function onTileLoad() {
+    tilesPainted += 1;
+    if (tileWarning) {           // tiles came back after all — take the notice down
+      map.removeControl(tileWarning);
+      tileWarning = null;
+    }
+  }
+
+  function onTileError() {
+    tileErrors += 1;
+    if (tileWarning || tilesPainted > 0 || tileErrors < TILE_ERROR_THRESHOLD) return;
+
+    tileWarning = L.control({ position: "topright" });
+    tileWarning.onAdd = function () {
       var div = L.DomUtil.create("div", "map-legend tile-warning");
       div.innerHTML =
         "<h2>The paint didn't arrive</h2>" +
-        "<p style='margin:0;max-width:15rem'>The watercolor tiles wouldn't load. Off " +
-        "<code>localhost</code>, Stadia Maps needs a free API key — add yours in " +
-        "<code>js/app.js</code>.</p>";
+        "<p style='margin:0 0 .35rem;max-width:15rem'>No watercolor tiles are loading. " +
+        "Stadia Maps serves them key-free on <code>localhost</code> only — anywhere else an " +
+        "unauthenticated request comes back <code>401</code>.</p>" +
+        "<p style='margin:0;max-width:15rem'>Add an API key in <code>js/app.js</code> or " +
+        "allow this domain on your Stadia property. If neither applies, check the network " +
+        "tab — an ad blocker or proxy may be swallowing the requests.</p>";
       L.DomEvent.disableClickPropagation(div);
       return div;
     };
-    note.addTo(map);
+    tileWarning.addTo(map);
   }
 
   /* --------------------------- Pins ---------------------------- */

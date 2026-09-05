@@ -30,19 +30,29 @@ key-free on `localhost` / `127.0.0.1`, so local development needs no setup. **On
 other domain you need a free API key**, or the tiles come back 401 and the map stays
 blank (the page will tell you so, in that case).
 
-1. Register at [client.stadiamaps.com](https://client.stadiamaps.com) and create a key.
-2. Add your domain to the key's allowed list.
-3. Drop the key into `js/app.js`:
+Register at [client.stadiamaps.com](https://client.stadiamaps.com), then pick either route:
 
-```js
-var STADIA_API_KEY = "your-key-here";
-```
+- **API key** — create one and drop it into `js/app.js`:
+
+  ```js
+  var STADIA_API_KEY = "your-key-here";
+  ```
+
+- **Domain allowlist** — add your domain to your Stadia property's allowed domains, and
+  keyless requests from that origin are authenticated by their `Origin` header. Nothing
+  to put in the code, and no key to leak in a public repo.
+
+If no tiles load at all, the map raises a notice explaining this rather than sitting
+blank. It waits for several consecutive failures with nothing painted, so a single
+unlucky tile won't trigger it, and it clears itself if the tiles start arriving.
 
 Attribution for Stadia, Stamen, OpenMapTiles and OpenStreetMap is already wired into
 the map's attribution control; their terms require you to keep it visible.
 
 Two layers are stacked: `stamen_watercolor` for the painting, and a translucent
-`stamen_terrain_labels` overlay so street names stay readable on top of it.
+`stamen_terrain_labels` overlay so street names stay readable on top of it. Watercolor
+is only painted down to zoom 16, so it is set to upscale past that (`maxNativeZoom: 16`)
+rather than vanish and leave the labels floating on blank paper.
 
 ## The directory data
 
