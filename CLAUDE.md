@@ -62,6 +62,33 @@ pointer moves toward it, making the link unclickable. The card is a popup with a
 `HOVER_CLOSE_DELAY` grace period that `bindPopupHoverKeepAlive()` cancels while the
 pointer is over the card itself. Clicking pins it open until `Esc` or a map click.
 
+**Exactly one popup is ever open.** `refreshDisplay()` is the only place that opens or
+closes a marker's popup; `displayedId()` (hover if any, else the pinned id, else none)
+decides which one, and every other marker is explicitly closed before that one opens.
+Hovering a different marker while one is pinned used to leave both open, because the old
+code spared the pinned id from its "close everyone else" sweep — two cards could overlap
+on the map. Don't special-case an id out of that sweep again; ending a hover with nothing
+else to show falls back to the pinned card on its own, so nothing needs to reopen it by
+hand.
+
+**Pan before opening the popup, never after.** `map.panTo()` recentres on the marker's
+raw coordinates with no idea how tall the popup about to open is; Leaflet's own `autoPan`
+does know, but only if it runs last. Calling `panTo` after `openPopup()` — even though
+the pan is still animating — updates the map's centre immediately and undoes autoPan's
+adjustment, which could leave a tall card's top pushed out above the map entirely with
+nothing to say so. `refreshDisplay()` calls `panTo` first, then opens.
+
+**Popups get a live `maxHeight`, recomputed at open time.** `.map-frame`'s rounded
+corners come from `overflow: hidden`, which clips a popup taller than the box exactly
+the way it clips everything else. The longest real listing (address + hours + phone)
+renders around 440px; desktop is a fixed one-viewport layout with no scroll to fall back
+on, so a short window can be shorter than that. `popupMaxHeight()` caps the popup to the
+map's current rendered height minus a margin right before each open, so a card that
+doesn't fit gets Leaflet's own small internal scrollbar instead of losing content to an
+invisible clip. On today's business copy this shouldn't ever actually trigger except on
+an unusually short desktop window — it's a safety net for a future longer listing, not
+the normal path.
+
 **All colour-on-colour pairs go through `numberStyle()`.** It picks white or deep purple
 for a number label by contrast, and where neither reaches 4.5:1 it deepens the fill until
 white does. Pins, sidebar badges, popup badges, chips and legend dots all use its output,

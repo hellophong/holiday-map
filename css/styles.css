@@ -582,12 +582,42 @@ a { color: var(--coral-text); }
   color: var(--ink-soft);
 }
 
-.map-legend .swatch {
+/* shared by the on-map legend and the mobile legend strip below */
+.swatch {
   width: 9px;
   height: 9px;
   border-radius: 50%;
   background: var(--swatch, var(--green));
   flex: none;
+}
+
+/* Mobile-only legend, replacing the on-map corner box. Wraps to as many
+   lines as it needs rather than scrolling, so every category is visible at
+   once. Hidden above 860px — see the media query at the bottom for its
+   mobile styling. */
+.legend-strip {
+  display: none;
+}
+
+/* Plain dot + label, matching the desktop on-map legend's own type and
+   swatch size exactly — this is that same list turned sideways, not another
+   chip. No pill background or shadow; entries are told apart by the row's
+   gap alone, the way lines in the desktop list are told apart by wrapping. */
+.legend-item {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  font-size: .76rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* Fixed "back to list" button. Only ever shown on mobile — see the media
+   query — where the sidebar and map are far apart in the scroll and a click
+   on a business needs a quick way back. */
+.back-to-top {
+  display: none;
 }
 
 .tile-warning {
@@ -611,7 +641,10 @@ a { color: var(--coral-text); }
 
   .layout {
     grid-template-columns: 1fr;
-    padding: .75rem .8rem 1rem;
+    /* extra bottom padding clears the fixed "back to list" button — without
+       it the button sits on top of the legend strip, the last thing on the
+       page */
+    padding: .75rem .8rem 4.5rem;
     /* stop the grid shrinking to the leftover viewport height: stacked, it
        should take its content height and let the page scroll instead */
     flex: 0 0 auto;
@@ -622,7 +655,11 @@ a { color: var(--coral-text); }
   .banner__inner { padding: 0 1rem; }
   .banner__scene { height: 88px; }
 
-  .map-frame { height: 58vh; min-height: 330px; }
+  /* Tall enough that a full popup card (address + hours + phone can run to
+     ~440px) fits without the map's rounded-corner clip cutting it off —
+     mobile already scrolls the page, so there's no fixed-viewport limit
+     working against this the way there is on desktop. */
+  .map-frame { height: 72vh; min-height: 460px; }
 
   /* Stacked on narrow screens the sidebar has no fixed height to scroll
      inside, so let the list flow and the page itself scroll — otherwise the
@@ -633,4 +670,57 @@ a { color: var(--coral-text); }
     flex: 0 0 auto;
     overflow: visible;
   }
+
+  /* The on-map legend corner covers a real chunk of a phone-sized map —
+     hide it and run the same key horizontally underneath instead. */
+  .map-legend { display: none; }
+
+  /* The category chips repeat what the legend strip now shows right below
+     the map, so they're dropped here to shorten the list you scroll past to
+     reach it. Typing a category name into search still narrows by it. */
+  .filters { display: none; }
+
+  .legend-strip {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: .5rem;
+    column-gap: 1.1rem;
+    padding: .7rem .2rem 0;
+  }
+
+  .back-to-top {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 1000;
+    border: 0;
+    border-radius: 999px;
+    padding: .55rem 1rem;
+    background: var(--ink);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: .82rem;
+    font-weight: 700;
+    box-shadow: 0 6px 18px rgba(62, 42, 86, .3);
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+
+  .back-to-top svg { width: 14px; height: 14px; flex: none; }
+
+  .back-to-top.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+}
+
+@media (max-width: 860px) and (prefers-reduced-motion: reduce) {
+  .back-to-top { transition: none; }
 }

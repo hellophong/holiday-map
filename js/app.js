@@ -15,6 +15,34 @@
   var DATA_URL = "data/businesses.json";
   var HOVER_CLOSE_DELAY = 260; // ms of grace to travel from pin to card
 
+  /* Mirrors the CSS breakpoint that stacks the sidebar above the map. Used
+     to gate the mobile-only scroll-to-map and back-to-list behaviour. */
+  var MOBILE_QUERY = window.matchMedia("(max-width: 860px)");
+
+  function reducedMotion() {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  /* scrollToEl slides pins (or sidebar rows) across whatever the mouse
+     happens to be resting on. A stationary cursor still gets a genuine
+     mouseover from the browser when content moves underneath it, so a smooth
+     scroll can fire a real hover on every marker or card it sweeps past —
+     opening a trail of cards that never received an actual mouseleave to
+     close them. Hover handling is suppressed for the rough duration of the
+     scroll so only deliberate hovers open a card. */
+  var HOVER_SUPPRESS_MS = 700;
+  var suppressHoverUntil = 0;
+
+  function hoverSuppressed() {
+    return Date.now() < suppressHoverUntil;
+  }
+
+  function scrollToEl(el) {
+    if (!el) return;
+    suppressHoverUntil = Date.now() + (reducedMotion() ? 0 : HOVER_SUPPRESS_MS);
+    el.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "start" });
+  }
+
   var state = {
     data: null,
     markers: {},          // id -> L.Marker
@@ -23,7 +51,7 @@
     hoverId: null,        // business under the cursor
     filters: new Set(),   // empty === show everything
     query: "",
-    closeTimer: null
+    closeTimers: {}       // business id -> pending hover-close timeout, one per marker
   };
 
   var map;
@@ -248,21 +276,89 @@
      card is a popup that opens on hover and lingers while the pointer is
      on it. Clicking a pin keeps it open until you dismiss it. */
 
-  function cancelClose() {
-    if (state.closeTimer) {
-      clearTimeout(state.closeTimer);
-      state.closeTimer = null;
+  /* Exactly one popup is ever open: whatever is being hovered, or failing
+     that, whatever is pinned, or failing that, nothing. Two cards were able
+     to show at once — hovering a different pin while one was pinned left
+     both open, since the old code explicitly spared the pinned id from the
+     "close everyone else" sweep. Routing every state change through this
+     one function instead of closing/opening ad hoc means there is no path
+     that can leave two cards up: it always closes every id but the winner
+     before opening it. Ending a hover doesn't lose the pin either — with
+     nothing left hovered, the winner falls back to activeId and its card
+     reopens on its own. */
+  function displayedId() {
+    return state.hoverId || state.activeId;
+  }
+
+  function cancelClose(id) {
+    if (state.closeTimers[id]) {
+      clearTimeout(state.closeTimers[id]);
+      delete state.closeTimers[id];
     }
   }
 
+  function closeCard(id) {
+    cancelClose(id);
+    var marker = state.markers[id];
+    if (marker) marker.closePopup();
+  }
+
+  /* The map's rounded corners come from .map-frame's overflow:hidden, which
+     clips anything inside it uniformly — including a popup, if the popup
+     is taller than the box. That's a real case: the longest business copy
+     (address + hours + phone) renders around 440px tall, and the map area
+     can be shorter than that on a short viewport, or on desktop, which is a
+     fixed one-viewport layout with no scroll to fall back on. Rather than
+     let the overflow clip invisibly cut the card off, the popup's maxHeight
+     is set fresh from the map's own current size right before it opens —
+     comfortably enough room and it's identical to today; too little and
+     Leaflet gives the content itself a small internal scrollbar instead of
+     losing it, which is the one on today's business copy this should never
+     actually trigger, but keeps a future longer listing from disappearing
+     rather than merely scrolling. */
+  function popupMaxHeight() {
+    var frame = document.querySelector(".map-frame");
+    if (!frame) return null;
+    return Math.max(120, frame.getBoundingClientRect().height - 32);
+  }
+
+  function refreshDisplay(opts) {
+    var showId = displayedId();
+
+    Object.keys(state.markers).forEach(function (otherId) {
+      if (otherId !== showId) closeCard(otherId);
+    });
+
+    if (showId) {
+      var marker = state.markers[showId];
+      if (marker) {
+        cancelClose(showId);
+        /* Pan before opening, not after: panTo updates the map's internal
+           centre synchronously even though the visual animation is still
+           catching up, but it recentres on the marker with no idea how
+           tall the popup about to open is. Opening the popup afterward
+           lets Leaflet's own autoPan — which does know the popup's size —
+           make the last, popup-aware adjustment. Doing it in the other
+           order let a plain recentre undo autoPan's fix a moment later,
+           leaving a tall card's top pushed out past the map entirely. */
+        if (opts && opts.pan) map.panTo(marker.getLatLng(), { animate: true });
+        var popup = marker.getPopup();
+        if (popup) popup.options.maxHeight = popupMaxHeight();
+        marker.openPopup();
+        bindPopupHoverKeepAlive(marker, showId);
+      }
+    }
+
+    syncActiveStyles();
+  }
+
   function scheduleClose(id) {
-    cancelClose();
-    state.closeTimer = setTimeout(function () {
-      if (state.activeId === id) return; // pinned open by a click
-      var marker = state.markers[id];
-      if (marker) marker.closePopup();
-      if (state.hoverId === id) state.hoverId = null;
-      syncActiveStyles();
+    cancelClose(id);
+    state.closeTimers[id] = setTimeout(function () {
+      delete state.closeTimers[id];
+      if (state.hoverId !== id) return; // superseded by a newer hover already
+      state.hoverId = null;
+      refreshDisplay();
     }, HOVER_CLOSE_DELAY);
   }
 
@@ -270,30 +366,20 @@
     var el = marker.getPopup() && marker.getPopup().getElement();
     if (!el || el._merryBound) return;
     el._merryBound = true;
-    L.DomEvent.on(el, "mouseenter", cancelClose);
+    L.DomEvent.on(el, "mouseenter", function () { showCard(id); });
     L.DomEvent.on(el, "mouseleave", function () { scheduleClose(id); });
   }
 
   function showCard(id, opts) {
-    var marker = state.markers[id];
-    if (!marker) return;
-    cancelClose();
+    if (!state.markers[id]) return;
+    cancelClose(id);
     state.hoverId = id;
-    marker.openPopup();
-    bindPopupHoverKeepAlive(marker, id);
-    if (opts && opts.pan) map.panTo(marker.getLatLng(), { animate: true });
-    syncActiveStyles();
+    refreshDisplay(opts);
   }
 
   function pinCard(id) {
     state.activeId = state.activeId === id ? null : id;
-    if (state.activeId) {
-      showCard(id, { pan: true });
-    } else {
-      var marker = state.markers[id];
-      if (marker) marker.closePopup();
-    }
-    syncActiveStyles();
+    refreshDisplay({ pan: !!state.activeId });
   }
 
   function syncActiveStyles() {
@@ -398,13 +484,20 @@
         '<span class="card__num" aria-hidden="true">' + state.numbers[business.id] + "</span>" +
         '<span class="card__name">' + esc(business.name) + "</span>";
 
-      item.addEventListener("mouseenter", function () { showCard(business.id); });
+      /* On the stacked mobile layout the sidebar sits well above the map, so
+         a click needs to bring the map (and the popup it just opened) into
+         view. Desktop already shows both at once — nothing to scroll to. */
+      item.addEventListener("mouseenter", function () { if (!hoverSuppressed()) showCard(business.id); });
       item.addEventListener("mouseleave", function () { scheduleClose(business.id); });
-      item.addEventListener("click", function () { pinCard(business.id); });
+      item.addEventListener("click", function () {
+        pinCard(business.id);
+        if (MOBILE_QUERY.matches) scrollToEl(document.querySelector(".map-frame"));
+      });
       item.addEventListener("keydown", function (event) {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
           pinCard(business.id);
+          if (MOBILE_QUERY.matches) scrollToEl(document.querySelector(".map-frame"));
         }
       });
 
@@ -414,15 +507,21 @@
 
   /* ---------------------------- Legend -------------------------- */
 
+  function legendItems() {
+    return Object.keys(state.data.categories).map(function (id) {
+      var category = state.data.categories[id];
+      return { label: category.label, color: numberStyle(category.color).bg };
+    });
+  }
+
   function addLegend() {
     var legend = L.control({ position: "bottomleft" });
 
     legend.onAdd = function () {
       var div = L.DomUtil.create("div", "map-legend");
-      var items = Object.keys(state.data.categories).map(function (id) {
-        var category = state.data.categories[id];
-        return '<li><span class="swatch" style="--swatch:' + numberStyle(category.color).bg + '"></span>' +
-               esc(category.label) + "</li>";
+      var items = legendItems().map(function (item) {
+        return '<li><span class="swatch" style="--swatch:' + item.color + '"></span>' +
+               esc(item.label) + "</li>";
       });
       div.innerHTML = "<h2>Who's who</h2><ul>" + items.join("") + "</ul>";
       L.DomEvent.disableClickPropagation(div);
@@ -430,6 +529,41 @@
     };
 
     legend.addTo(map);
+  }
+
+  /* The same key, laid out as a wrapping strip under the map for mobile —
+     see .legend-strip in the CSS for why it exists. */
+  function renderLegendStrip() {
+    var host = document.getElementById("legendStrip");
+    if (!host) return;
+
+    host.innerHTML = legendItems().map(function (item) {
+      return '<span class="legend-item" role="listitem"><span class="swatch" style="--swatch:' +
+        item.color + '"></span>' + esc(item.label) + "</span>";
+    }).join("");
+  }
+
+  /* ------------------------- Back to list ------------------------- */
+  /* A fixed button that appears once the map has scrolled into view on
+     mobile, and returns to the sidebar in one tap rather than a long swipe. */
+
+  function initBackToTop() {
+    var btn = document.getElementById("backToTop");
+    var mapFrame = document.querySelector(".map-frame");
+    if (!btn || !mapFrame) return;
+
+    function updateVisibility() {
+      if (!MOBILE_QUERY.matches) {
+        btn.classList.remove("is-visible");
+        return;
+      }
+      btn.classList.toggle("is-visible", mapFrame.getBoundingClientRect().top < window.innerHeight * 0.5);
+    }
+
+    btn.addEventListener("click", function () { scrollToEl(document.querySelector(".sidebar")); });
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    window.addEventListener("resize", updateVisibility);
+    updateVisibility();
   }
 
   /* ----------------------------- Boot --------------------------- */
@@ -458,7 +592,7 @@
         offset: [0, 0]
       });
 
-      marker.on("mouseover", function () { showCard(business.id); });
+      marker.on("mouseover", function () { if (!hoverSuppressed()) showCard(business.id); });
       marker.on("mouseout", function () { scheduleClose(business.id); });
       marker.on("click", function () { pinCard(business.id); });
       marker.on("keypress", function () { pinCard(business.id); });
@@ -515,24 +649,22 @@
     buildMarkers();
     renderCards(orderedBusinesses());
     addLegend();
+    renderLegendStrip();
+    initBackToTop();
     wireSearch();
 
     /* Clicking the paper itself puts the pinned card away. */
     map.on("click", function () {
       if (state.activeId) {
-        var marker = state.markers[state.activeId];
         state.activeId = null;
-        if (marker) marker.closePopup();
-        syncActiveStyles();
+        refreshDisplay();
       }
     });
 
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && state.activeId) {
-        var marker = state.markers[state.activeId];
         state.activeId = null;
-        if (marker) marker.closePopup();
-        syncActiveStyles();
+        refreshDisplay();
       }
     });
   }

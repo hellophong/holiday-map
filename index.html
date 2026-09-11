@@ -48,7 +48,21 @@
       <div id="map" role="application" aria-label="Map of Christmas businesses"></div>
       <noscript><p class="noscript">This map needs JavaScript to unwrap itself.</p></noscript>
     </div>
+
+    <!-- Mobile only: the on-map legend corner is hidden below 860px (it was
+         covering a chunk of a small map), and this runs the same key
+         underneath instead, wrapping to as many lines as it needs. Desktop
+         keeps the on-map legend. -->
+    <div class="legend-strip" id="legendStrip" role="list" aria-label="Category legend"></div>
   </main>
+
+  <button type="button" id="backToTop" class="back-to-top">
+    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M8 12.5V3.5M8 3.5L3.5 8M8 3.5L12.5 8" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+    Back to list
+  </button>
 
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="js/app.js"></script>
