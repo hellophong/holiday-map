@@ -89,42 +89,92 @@ invisible clip. On today's business copy this shouldn't ever actually trigger ex
 an unusually short desktop window — it's a safety net for a future longer listing, not
 the normal path.
 
-**A marker's popup only ever calls `openPopup()` when it isn't already open.**
-`refreshDisplay()` used to call `marker.openPopup()` every time, on the theory that
-Leaflet no-ops if that marker's popup is already showing. It doesn't: `openPopup()` goes
-through `_prepareOpen()`, which unconditionally calls `update()` → `_updateContent()` →
-`contentNode.innerHTML = sameString`, rebuilding every child node even when the content
-hasn't changed. `bindPopupHoverKeepAlive()`'s own "mouseenter" on the popup calls back
-into `refreshDisplay()` on every hover — including hovering from one part of an
-already-open card toward another, with no pin involved — so a cursor moving from the
-card's edge toward "Visit their site" or the phone number tore out and replaced that
-exact link mid-approach, sometimes mid-click. The rebuilt link is byte-identical HTML, so
-nothing *looked* wrong; the popup just silently ate the click. `refreshDisplay()` now
-checks `marker.isPopupOpen()` first and skips the reopen entirely when it's already the
-one on screen — pan and `bindPopupHoverKeepAlive()` still run either way, only the
-destructive reopen is skipped.
+**`bindPopupHoverKeepAlive()`'s "mouseenter" checks `hoverSuppressed()` too, same as
+every other hover entry point.** It didn't used to: its whole job is letting the pointer
+travel from a pin onto its own just-opened card without losing it, which needs to keep
+working even mid `HOVER_CLOSE_DELAY`, so it seemed exempt from the suppression every other
+hover path respects. But a *previous* selection's card keeps this same handler bound while
+it's still open, and on mobile, tapping a sidebar row scrolls the page via `scrollToEl()`
+— if a still cursor ends up sweeping across that stale, not-yet-closed card as the page
+animates underneath it, that's a real mouseenter, and it fired `showCard()` for whatever
+the cursor landed on, silently redirecting the display to a row nobody touched. Nothing
+ever sent a matching mouseleave afterward (the cursor doesn't move again once the scroll
+settles), so this wasn't a one-frame flicker — the display stayed wrong until the next
+real interaction. `hoverSuppressed()` is only ever true in that same mobile scroll window
+(`scrollToEl` is the one thing that sets it, and it only runs on mobile), so gating on it
+here costs nothing on desktop's legitimate pin-to-card hover, which never runs under
+suppression.
 
-**The on-map legend can't intercept clicks — it has `pointer-events: none`.** It's Leaflet
-`L.control()`, and every Leaflet control gets a default `z-index:800` with its corner
-container at `1000`, both above `.leaflet-popup-pane`'s default `700`. Popups render
-inside `.leaflet-map-pane`, which Leaflet gives a CSS `transform` for panning — that
-transform makes it a stacking context of its own, so no z-index on a pane inside it can
-ever out-rank `.leaflet-control-container`, a later sibling entirely outside that context;
+**The mobile "click a row, scroll to the map" sequence runs `scrollToEl()` before
+`pinCard()`, not after.** `scrollToEl()` is what sets `suppressHoverUntil`; calling
+`pinCard()` first left a gap — its own synchronous work — during which the page could
+already be sliding a *different* sidebar row under a still cursor with nothing yet
+guarding against it. Leaflet's own panning doesn't care about page scroll order (it
+reasons entirely in the map container's own coordinates, never the page's), so swapping
+the two costs nothing there.
+
+**A selected card gets nudged to sit centred in the frame, not just inside it —
+`centerDisplayedGroup()`, mobile only.** Fitting (`popupMaxHeight`, `autoPan`) isn't the
+same as looking centred: `autoPan` only pans the minimum needed to satisfy its own
+padding, so a card can end up flush against the frame's top edge with all the slack left
+below it — technically uncropped, but visually lopsided, especially once the map is the
+whole screen a moment after tapping a row. This runs once the initial pan (and whatever
+correction `autoPan` made when the popup opened) has already landed — by the time
+`openPopup()` returns, both have, since `_adjustPan` always stops any in-flight `panTo`
+animation the instant a popup opens, whether or not it ends up needing its own correction
+— and nudges the map so the popup+marker group sits in the middle of the frame instead of
+wherever `autoPan` happened to leave it, clamped to never ask for more than the slack
+that's actually there. It also runs a second time, timed just past
+`HOVER_SUPPRESS_MS + HOVER_CLOSE_DELAY`: idempotent and staleness-checked (skips outright
+if a different card is displayed by the time it fires), so it's a no-op once the first
+pass already centred things, and a real correction if a stray hover in that window nudged
+them since — see the `hoverSuppressed()` invariant above for exactly how that happens.
+
+**A marker's popup only calls `openPopup()` when it isn't already open, or when this call
+is actually panning.** `refreshDisplay()` used to call `marker.openPopup()` every time, on
+the theory that Leaflet no-ops if that marker's popup is already showing. It doesn't:
+`openPopup()` goes through `_prepareOpen()`, which unconditionally calls `update()` →
+`_updateContent()` → `contentNode.innerHTML = sameString`, rebuilding every child node
+even when the content hasn't changed. `bindPopupHoverKeepAlive()`'s own "mouseenter" on
+the popup calls back into `refreshDisplay()` on every hover — including hovering from one
+part of an already-open card toward another, with no pin involved — so a cursor moving
+from the card's edge toward "Visit their site" or the phone number tore out and replaced
+that exact link mid-approach, sometimes mid-click. The rebuilt link is byte-identical
+HTML, so nothing *looked* wrong; the popup just silently ate the click. `refreshDisplay()`
+skips the reopen when `marker.isPopupOpen()` is already true — *unless* this call also
+just panned: `panTo()` recentres on the marker's raw coordinates with no idea how tall the
+popup is, and it's `openPopup()`'s own `autoPan` that makes the popup-aware correction
+afterward. Skipping the reopen on every already-open popup, with no exception, silently
+broke that correction on mobile: tapping a sidebar row fires that row's own hover-driven
+open first (wherever the map already happened to be centred), so by the time the tap's
+`pinCard()` runs, the popup is already open, and skipping its reopen skipped the only
+`autoPan` call that knew the card's real height — leaving a plain recentre's crop
+uncorrected. So: skip the reopen for a redundant same-marker hover, never for an actual
+pan.
+
+**On-map Leaflet controls that aren't the zoom/attribution chrome share a
+`.map-panel` class, and it's `pointer-events: none`.** Popups render inside
+`.leaflet-map-pane`, which Leaflet gives a CSS `transform` for panning — that transform
+makes it a stacking context of its own, so no z-index on a pane inside it can ever
+out-rank `.leaflet-control-container`, a later sibling entirely outside that context;
 raising `.leaflet-popup-pane`'s z-index only reorders it among the map's *own* internal
-layers; it changes nothing relative to the controls. The legend sits bottom-left, the same
-corner plenty of pins land in, so a popup opening there silently lost clicks on "Visit
-their site" and the phone number to the legend sitting over it — same on-screen popup, but
-the corner behind it was reading as ahead of it. The legend has nothing clickable in it (a
-static swatch + label key), so the fix is to take it out of hit-testing entirely rather
-than fight Leaflet's pane stacking. Desktop-only: mobile hides the on-map legend for the
-strip under the map instead. Any future on-map Leaflet control that similarly doesn't need
-clicks should get the same treatment rather than reopening this fight.
+layers, changing nothing relative to the controls. This class used to also style an
+on-map category legend (bottomleft) — removed since the sidebar's filter chips already
+carry a colour dot per category, making the legend a third rendering of the same key
+(chips, the mobile strip, and the on-map box) — and that legend is exactly how this got
+found: a popup opening in the same corner silently lost clicks on "Visit their site" and
+the phone number to the legend sitting over it, because Leaflet's control stacking always
+wins there regardless of the popup pane's own z-index. `.map-panel` currently styles just
+the tile-failure notice, which is equally static and non-interactive, so the same
+`pointer-events: none` applies pre-emptively. Any future on-map control built from this
+class that similarly doesn't need clicks is already covered; one that does would need its
+own exception.
 
 **All colour-on-colour pairs go through `numberStyle()`.** It picks white or deep purple
 for a number label by contrast, and where neither reaches 4.5:1 it deepens the fill until
-white does. Pins, sidebar badges, popup badges, chips and legend dots all use its output,
-so a pin and its legend dot always match. Categories added later inherit this
-automatically — do not hardcode a label colour.
+white does. Pins, sidebar badges, popup badges, chips, and the mobile legend strip's dots
+all use its output, so a pin and its chip dot always match. Categories added later inherit
+this automatically — do not hardcode a label colour.
 
 **The map does not fit its pins.** `meta.center` / `meta.zoom` are used as given.
 `fitBounds` was removed deliberately: outlying listings (Louisa, the Northern Neck) pulled

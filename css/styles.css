@@ -554,22 +554,21 @@ a { color: var(--coral-text); }
 
 .leaflet-control-attribution a { color: var(--ink-soft) !important; }
 
-/* Popups render inside .leaflet-map-pane, which Leaflet gives a CSS
-   `transform` for panning — that transform makes it a stacking context of
-   its own, so no z-index on .leaflet-popup-pane (a descendant) can ever
-   out-rank .leaflet-control-container, a later sibling outside that
-   context entirely; raising the popup pane's number just reorders it
-   among the map's own internal layers and changes nothing relative to the
-   controls. The on-map legend (bottomleft) sits in that control
-   container, so a popup opening in the same corner had the legend win
-   every hit-test, silently swallowing taps on "Visit their site" and the
-   phone number with no visible sign why. Only desktop keeps this on-map
-   legend — mobile hides it for the strip under the map instead — so this
-   was desktop-only. The legend has nothing clickable in it (a static
-   swatch + label key), so the fix is simply to take it out of
-   consideration for clicks altogether rather than fight Leaflet's pane
-   stacking. */
-.map-legend {
+/* Shared "paper card" look for on-map Leaflet controls that aren't the
+   zoom/attribution chrome — currently just the tile-failure notice. Used
+   to also style an on-map category legend (bottomleft), removed because
+   the sidebar's filter chips already carry a colour dot per category, so
+   the legend was a third rendering of the same key (chips, the mobile
+   strip below, and this). Any on-map control built from this class is a
+   static, non-interactive box that can end up under an open popup —
+   pointer-events: none keeps it from winning that hit-test and silently
+   swallowing a click meant for the popup (this bit the old legend
+   specifically: a popup opening over it lost taps on "Visit their site"
+   and the phone number, because Leaflet's own control stacking always
+   paints .leaflet-control-container above the popup pane, however high
+   the popup pane's own z-index goes — see .leaflet-map-pane in the
+   architecture notes for why). */
+.map-panel {
   pointer-events: none;
   background: var(--paper);
   border-radius: var(--radius-md);
@@ -580,7 +579,7 @@ a { color: var(--coral-text); }
   color: var(--ink);
 }
 
-.map-legend h2 {
+.map-panel h2 {
   font-family: var(--font-display);
   font-weight: 500;
   font-size: .95rem;
@@ -588,17 +587,8 @@ a { color: var(--coral-text); }
   color: var(--ink);
 }
 
-.map-legend ul { margin: 0; padding: 0; }
-
-.map-legend li {
-  list-style: none;
-  display: flex;
-  align-items: center;
-  gap: .45rem;
-  color: var(--ink-soft);
-}
-
-/* shared by the on-map legend and the mobile legend strip below */
+/* shared by the chips' dot, the mobile legend strip below, and (styled
+   inline via --swatch) anywhere else a category's colour needs a dot */
 .swatch {
   width: 9px;
   height: 9px;
@@ -686,10 +676,6 @@ a { color: var(--coral-text); }
     flex: 0 0 auto;
     overflow: visible;
   }
-
-  /* The on-map legend corner covers a real chunk of a phone-sized map —
-     hide it and run the same key horizontally underneath instead. */
-  .map-legend { display: none; }
 
   /* The category chips repeat what the legend strip now shows right below
      the map, so they're dropped here to shorten the list you scroll past to

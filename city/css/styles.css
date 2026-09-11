@@ -571,7 +571,17 @@ a { color: var(--coral-text); }
 
 .leaflet-control-attribution a { color: var(--ink-soft) !important; }
 
-.map-legend {
+/* Shared "paper card" look for on-map Leaflet controls that aren't the
+   zoom/attribution chrome — currently just the tile-failure notice. Kept
+   in sync with the root stylesheet's .map-panel: the root's on-map
+   category legend (which used to share this class) was removed there
+   since the sidebar's filter chips already carry a colour dot per
+   category, and js/app.js is shared, so the same removal applies here.
+   pointer-events: none keeps a static, non-interactive box like this from
+   winning a hit-test over an open popup underneath it — see the root
+   stylesheet for the fuller story. */
+.map-panel {
+  pointer-events: none;
   background: var(--paper);
   border-radius: var(--radius-md);
   box-shadow: 0 6px 18px rgba(62, 42, 86, .12);
@@ -581,7 +591,7 @@ a { color: var(--coral-text); }
   color: var(--ink);
 }
 
-.map-legend h2 {
+.map-panel h2 {
   font-family: var(--font-display);
   font-weight: 500;
   font-size: .95rem;
@@ -589,17 +599,8 @@ a { color: var(--coral-text); }
   color: var(--ink);
 }
 
-.map-legend ul { margin: 0; padding: 0; }
-
-.map-legend li {
-  list-style: none;
-  display: flex;
-  align-items: center;
-  gap: .45rem;
-  color: var(--ink-soft);
-}
-
-/* shared by the on-map legend and the mobile legend strip below */
+/* shared by the chips' dot, the mobile legend strip below, and (styled
+   inline via --swatch) anywhere else a category's colour needs a dot */
 .swatch {
   width: 9px;
   height: 9px;
@@ -687,10 +688,6 @@ a { color: var(--coral-text); }
     flex: 0 0 auto;
     overflow: visible;
   }
-
-  /* The on-map legend corner covers a real chunk of a phone-sized map —
-     hide it and run the same key horizontally underneath instead. */
-  .map-legend { display: none; }
 
   /* The category chips repeat what the legend strip now shows right below
      the map, so they're dropped here to shorten the list you scroll past to

@@ -110,7 +110,7 @@
 
     tileWarning = L.control({ position: "topright" });
     tileWarning.onAdd = function () {
-      var div = L.DomUtil.create("div", "map-legend tile-warning");
+      var div = L.DomUtil.create("div", "map-panel tile-warning");
       div.innerHTML =
         "<h2>The map didn't arrive</h2>" +
         "<p style='margin:0 0 .35rem;max-width:15rem'>No map tiles are loading. " +
@@ -327,6 +327,47 @@
     return Math.max(120, frame.getBoundingClientRect().height - 32);
   }
 
+  /* Fitting inside the frame (popupMaxHeight, autoPan) isn't the same as
+     looking centred. Leaflet's autoPan only pans the minimum needed to
+     satisfy its padding, so a card can end up flush against the frame's
+     top edge with all the slack left below it — technically uncropped,
+     but visually lopsided, especially on the stacked mobile layout where
+     the map is the whole screen a moment after tapping a row. This runs
+     once the pan from a selection has actually settled (autoPan's own
+     correction included) and nudges the map so the popup+marker group
+     sits in the middle of the frame instead of wherever autoPan happened
+     to leave it — never past either edge, since the clamp below never
+     asks for more than the slack that's already there. Mobile-only: on
+     desktop's fixed one-viewport layout there's normally room to spare
+     and this hasn't been asked for. */
+  function centerDisplayedGroup(marker, showId) {
+    if (!MOBILE_QUERY.matches) return;
+    if (displayedId() !== showId) return; // stale — user has moved on since
+    var popupEl = marker.getPopup() && marker.getPopup().getElement();
+    var markerEl = marker.getElement();
+    var frame = document.querySelector(".map-frame");
+    if (!popupEl || !markerEl || !frame) return;
+
+    var frameRect = frame.getBoundingClientRect();
+    var popupRect = popupEl.getBoundingClientRect();
+    var markerRect = markerEl.getBoundingClientRect();
+    var groupTop = Math.min(popupRect.top, markerRect.top);
+    var groupBottom = Math.max(popupRect.bottom, markerRect.bottom);
+    var groupHeight = groupBottom - groupTop;
+    if (groupHeight >= frameRect.height) return; // no slack to redistribute
+
+    var desiredTop = frameRect.top + (frameRect.height - groupHeight) / 2;
+    var delta = groupTop - desiredTop; // > 0: group sits too low, needs to move up
+    if (Math.abs(delta) < 4) return; // already close enough
+
+    var maxUp = groupTop - frameRect.top;
+    var maxDown = frameRect.bottom - groupBottom;
+    delta = Math.max(-maxDown, Math.min(maxUp, delta));
+    if (Math.abs(delta) < 4) return;
+
+    map.panBy([0, delta], { animate: true });
+  }
+
   function refreshDisplay(opts) {
     var showId = displayedId();
 
@@ -348,26 +389,67 @@
            leaving a tall card's top pushed out past the map entirely. */
         if (opts && opts.pan) map.panTo(marker.getLatLng(), { animate: true });
 
-        /* Only call openPopup() when this marker's card isn't already the
-           one on screen. Leaflet's openPopup doesn't no-op on an
-           already-open popup the way it looks like it should — it runs
-           _prepareOpen() -> update() -> _updateContent() unconditionally,
-           which does contentNode.innerHTML = sameString and silently
-           rebuilds every child node. bindPopupHoverKeepAlive's own
-           "mouseenter" on the popup calls back into here on every hover,
-           including hovering from one part of an already-open card to
-           another (the pin's own icon isn't involved at all) — so without
-           this guard, moving the pointer toward "Visit their site" or the
-           phone number tore out and replaced the very link it was headed
-           for, sometimes mid-click. The rebuilt link is identical HTML,
-           so nothing *looked* wrong — the popup just quietly ate the
-           click. */
-        if (!marker.isPopupOpen()) {
+        /* Reopen only when this marker's card isn't already the one on
+           screen, UNLESS this call just panned. Leaflet's openPopup
+           doesn't no-op on an already-open popup the way it looks like it
+           should — it runs _prepareOpen() -> update() -> _updateContent()
+           unconditionally, which does contentNode.innerHTML = sameString
+           and silently rebuilds every child node. bindPopupHoverKeepAlive's
+           own "mouseenter" on the popup calls back into here on every
+           hover, including hovering from one part of an already-open card
+           toward another (the pin's own icon isn't involved at all) — so
+           without a guard here, moving the pointer toward "Visit their
+           site" or the phone number tore out and replaced the very link it
+           was headed for, sometimes mid-click. The rebuilt link is
+           identical HTML, so nothing *looked* wrong — the popup just
+           quietly ate the click.
+
+           But a real pan still needs the reopen: panTo recentres on the
+           marker's raw coordinates with no idea how tall the popup is —
+           the "pan before opening" comment above only fixes that when
+           opening actually follows, since it's openPopup()'s own autoPan
+           that makes the popup-aware correction. On mobile a tap on a
+           sidebar row fires a hover-driven open (via the row's own
+           mouseenter, at whatever far-off point the map already happened
+           to be centred) before the click's pinCard() ever runs, so by
+           the time the click calls refreshDisplay({pan:true}) the popup
+           is already open — skipping the reopen here would skip the only
+           autoPan call that accounts for the card's real height, leaving
+           a plain recentre's crop uncorrected. So: skip the reopen for a
+           redundant same-marker hover, never for an actual pan. */
+        if (!marker.isPopupOpen() || (opts && opts.pan)) {
           var popup = marker.getPopup();
           if (popup) popup.options.maxHeight = popupMaxHeight();
           marker.openPopup();
         }
         bindPopupHoverKeepAlive(marker, showId);
+
+        /* Popup.prototype._adjustPan (autoPan) always stops any in-flight
+           panTo animation the instant a popup opens, whether or not it
+           ends up needing its own correction — so by this point in the
+           same synchronous call, both the pan above and any autoPan fix
+           it triggered have already landed, and this first call usually
+           lands the group dead centre on its own.
+
+           On mobile, clicking a sidebar row also scrolls the page itself
+           to bring the map into view (see scrollToEl above pinCard's
+           call), and a still cursor can end up sliding over *other*
+           sidebar rows as they pass underneath during that scroll — each
+           one is a real mouseenter, so it opens that row's own card and
+           re-pans/re-opens right on top of the selection this function
+           just centred. suppressHoverUntil (set by scrollToEl) blocks
+           that for HOVER_SUPPRESS_MS, and if a row does still catch a
+           hover right as suppression lifts, HOVER_CLOSE_DELAY's own
+           mouseleave-driven cleanup brings the display back to the
+           pinned card shortly after. Both of those run on a clock this
+           function doesn't otherwise wait on, so a second, idempotent
+           pass timed just past both — a no-op if the first pass already
+           has things centred, a real correction if something nudged them
+           in between — catches whatever that leaves behind. */
+        if (opts && opts.pan) {
+          centerDisplayedGroup(marker, showId);
+          setTimeout(function () { centerDisplayedGroup(marker, showId); }, HOVER_SUPPRESS_MS + HOVER_CLOSE_DELAY + 150);
+        }
       }
     }
 
@@ -384,11 +466,28 @@
     }, HOVER_CLOSE_DELAY);
   }
 
+  /* Every other hover entry point (sidebar row, marker icon) checks
+     hoverSuppressed() before calling showCard — this one didn't, because
+     its whole point is to let the pointer travel from a pin onto its own
+     just-opened card without losing it, which needs to work even mid
+     hover-close-delay. But a still-open card from a *previous* selection
+     keeps this same unguarded mouseenter bound, and on mobile a still
+     cursor can end up sweeping across that stale card as scrollToEl
+     animates the page underneath it — a real mouseenter, so it fires
+     showCard for whatever the cursor lands on, silently redirecting the
+     display to a row the user never touched. Nothing ever emits a
+     matching mouseleave for it afterward (the cursor doesn't move again
+     once the scroll settles), so hoverId is left stuck there — not a
+     one-frame flicker, but the display staying wrong until the next real
+     interaction. hoverSuppressed() is only ever true in that mobile
+     scroll window (scrollToEl is the one thing that sets it, and it's
+     mobile-only), so gating on it here costs nothing on desktop's
+     legitimate pin-to-card hover, which never runs under suppression. */
   function bindPopupHoverKeepAlive(marker, id) {
     var el = marker.getPopup() && marker.getPopup().getElement();
     if (!el || el._merryBound) return;
     el._merryBound = true;
-    L.DomEvent.on(el, "mouseenter", function () { showCard(id); });
+    L.DomEvent.on(el, "mouseenter", function () { if (!hoverSuppressed()) showCard(id); });
     L.DomEvent.on(el, "mouseleave", function () { scheduleClose(id); });
   }
 
@@ -508,18 +607,25 @@
 
       /* On the stacked mobile layout the sidebar sits well above the map, so
          a click needs to bring the map (and the popup it just opened) into
-         view. Desktop already shows both at once — nothing to scroll to. */
+         view. Desktop already shows both at once — nothing to scroll to.
+         scrollToEl runs BEFORE pinCard, not after: it's what sets
+         suppressHoverUntil, and the page's own scroll can slide a
+         *different* sidebar row under a still cursor as it slides past,
+         firing that row's mouseenter with nothing suppressing it yet if
+         pinCard ran first. Leaflet's own panning is page-scroll-agnostic
+         (it reasons entirely in the map container's own coordinates), so
+         swapping the order costs nothing there. */
+      item.addEventListener("click", function () {
+        if (MOBILE_QUERY.matches) scrollToEl(document.querySelector(".map-frame"));
+        pinCard(business.id);
+      });
       item.addEventListener("mouseenter", function () { if (!hoverSuppressed()) showCard(business.id); });
       item.addEventListener("mouseleave", function () { scheduleClose(business.id); });
-      item.addEventListener("click", function () {
-        pinCard(business.id);
-        if (MOBILE_QUERY.matches) scrollToEl(document.querySelector(".map-frame"));
-      });
       item.addEventListener("keydown", function (event) {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          pinCard(business.id);
           if (MOBILE_QUERY.matches) scrollToEl(document.querySelector(".map-frame"));
+          pinCard(business.id);
         }
       });
 
@@ -536,25 +642,12 @@
     });
   }
 
-  function addLegend() {
-    var legend = L.control({ position: "bottomleft" });
-
-    legend.onAdd = function () {
-      var div = L.DomUtil.create("div", "map-legend");
-      var items = legendItems().map(function (item) {
-        return '<li><span class="swatch" style="--swatch:' + item.color + '"></span>' +
-               esc(item.label) + "</li>";
-      });
-      div.innerHTML = "<h2>Who's who</h2><ul>" + items.join("") + "</ul>";
-      L.DomEvent.disableClickPropagation(div);
-      return div;
-    };
-
-    legend.addTo(map);
-  }
-
   /* The same key, laid out as a wrapping strip under the map for mobile —
-     see .legend-strip in the CSS for why it exists. */
+     see .legend-strip in the CSS for why it exists. Desktop used to keep a
+     second copy of this key as an on-map corner control, but the sidebar's
+     filter chips already carry a colour dot per category, making that a
+     redundant third rendering of the same information (chips, this strip,
+     and the on-map box) — removed rather than kept in sync. */
   function renderLegendStrip() {
     var host = document.getElementById("legendStrip");
     if (!host) return;
@@ -670,7 +763,6 @@
     renderFilters();
     buildMarkers();
     renderCards(orderedBusinesses());
-    addLegend();
     renderLegendStrip();
     initBackToTop();
     wireSearch();
