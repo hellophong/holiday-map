@@ -89,6 +89,37 @@ invisible clip. On today's business copy this shouldn't ever actually trigger ex
 an unusually short desktop window — it's a safety net for a future longer listing, not
 the normal path.
 
+**A marker's popup only ever calls `openPopup()` when it isn't already open.**
+`refreshDisplay()` used to call `marker.openPopup()` every time, on the theory that
+Leaflet no-ops if that marker's popup is already showing. It doesn't: `openPopup()` goes
+through `_prepareOpen()`, which unconditionally calls `update()` → `_updateContent()` →
+`contentNode.innerHTML = sameString`, rebuilding every child node even when the content
+hasn't changed. `bindPopupHoverKeepAlive()`'s own "mouseenter" on the popup calls back
+into `refreshDisplay()` on every hover — including hovering from one part of an
+already-open card toward another, with no pin involved — so a cursor moving from the
+card's edge toward "Visit their site" or the phone number tore out and replaced that
+exact link mid-approach, sometimes mid-click. The rebuilt link is byte-identical HTML, so
+nothing *looked* wrong; the popup just silently ate the click. `refreshDisplay()` now
+checks `marker.isPopupOpen()` first and skips the reopen entirely when it's already the
+one on screen — pan and `bindPopupHoverKeepAlive()` still run either way, only the
+destructive reopen is skipped.
+
+**The on-map legend can't intercept clicks — it has `pointer-events: none`.** It's Leaflet
+`L.control()`, and every Leaflet control gets a default `z-index:800` with its corner
+container at `1000`, both above `.leaflet-popup-pane`'s default `700`. Popups render
+inside `.leaflet-map-pane`, which Leaflet gives a CSS `transform` for panning — that
+transform makes it a stacking context of its own, so no z-index on a pane inside it can
+ever out-rank `.leaflet-control-container`, a later sibling entirely outside that context;
+raising `.leaflet-popup-pane`'s z-index only reorders it among the map's *own* internal
+layers; it changes nothing relative to the controls. The legend sits bottom-left, the same
+corner plenty of pins land in, so a popup opening there silently lost clicks on "Visit
+their site" and the phone number to the legend sitting over it — same on-screen popup, but
+the corner behind it was reading as ahead of it. The legend has nothing clickable in it (a
+static swatch + label key), so the fix is to take it out of hit-testing entirely rather
+than fight Leaflet's pane stacking. Desktop-only: mobile hides the on-map legend for the
+strip under the map instead. Any future on-map Leaflet control that similarly doesn't need
+clicks should get the same treatment rather than reopening this fight.
+
 **All colour-on-colour pairs go through `numberStyle()`.** It picks white or deep purple
 for a number label by contrast, and where neither reaches 4.5:1 it deepens the fill until
 white does. Pins, sidebar badges, popup badges, chips and legend dots all use its output,

@@ -347,9 +347,26 @@
            order let a plain recentre undo autoPan's fix a moment later,
            leaving a tall card's top pushed out past the map entirely. */
         if (opts && opts.pan) map.panTo(marker.getLatLng(), { animate: true });
-        var popup = marker.getPopup();
-        if (popup) popup.options.maxHeight = popupMaxHeight();
-        marker.openPopup();
+
+        /* Only call openPopup() when this marker's card isn't already the
+           one on screen. Leaflet's openPopup doesn't no-op on an
+           already-open popup the way it looks like it should — it runs
+           _prepareOpen() -> update() -> _updateContent() unconditionally,
+           which does contentNode.innerHTML = sameString and silently
+           rebuilds every child node. bindPopupHoverKeepAlive's own
+           "mouseenter" on the popup calls back into here on every hover,
+           including hovering from one part of an already-open card to
+           another (the pin's own icon isn't involved at all) — so without
+           this guard, moving the pointer toward "Visit their site" or the
+           phone number tore out and replaced the very link it was headed
+           for, sometimes mid-click. The rebuilt link is identical HTML,
+           so nothing *looked* wrong — the popup just quietly ate the
+           click. */
+        if (!marker.isPopupOpen()) {
+          var popup = marker.getPopup();
+          if (popup) popup.options.maxHeight = popupMaxHeight();
+          marker.openPopup();
+        }
         bindPopupHoverKeepAlive(marker, showId);
       }
     }

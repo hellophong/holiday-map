@@ -554,7 +554,23 @@ a { color: var(--coral-text); }
 
 .leaflet-control-attribution a { color: var(--ink-soft) !important; }
 
+/* Popups render inside .leaflet-map-pane, which Leaflet gives a CSS
+   `transform` for panning — that transform makes it a stacking context of
+   its own, so no z-index on .leaflet-popup-pane (a descendant) can ever
+   out-rank .leaflet-control-container, a later sibling outside that
+   context entirely; raising the popup pane's number just reorders it
+   among the map's own internal layers and changes nothing relative to the
+   controls. The on-map legend (bottomleft) sits in that control
+   container, so a popup opening in the same corner had the legend win
+   every hit-test, silently swallowing taps on "Visit their site" and the
+   phone number with no visible sign why. Only desktop keeps this on-map
+   legend — mobile hides it for the strip under the map instead — so this
+   was desktop-only. The legend has nothing clickable in it (a static
+   swatch + label key), so the fix is simply to take it out of
+   consideration for clicks altogether rather than fight Leaflet's pane
+   stacking. */
 .map-legend {
+  pointer-events: none;
   background: var(--paper);
   border-radius: var(--radius-md);
   box-shadow: 0 6px 18px rgba(62, 42, 86, .12);
