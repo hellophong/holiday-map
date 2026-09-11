@@ -135,6 +135,33 @@ condensed to one or two while keeping the distinctive specifics. Publish `hours`
 they come from the business's own copy — hours scraped from a third-party listing may be
 stale, and a wrong time in a holiday guide sends someone to a locked door.
 
+## Second look-and-feel: /city/
+
+`city/` is a second theme for the same guide, live alongside the root at
+`/holiday-map/city/` rather than replacing it — see `city/README.md` for the full
+breakdown. It shares `../vendor/`, `../js/app.js`, and `../data/businesses.json` with the
+root; it owns its `index.html` and `css/styles.css`. Nothing here is a copy-paste fork of
+the whole site — only what's meant to actually differ (the look, eventually the header
+image) lives in `city/` at all.
+
+`js/app.js` reads `DATA_URL` from `window.DATA_URL || "data/businesses.json"` for exactly
+this: `city/index.html` sets `window.DATA_URL = "../data/businesses.json"` before loading
+the shared script, so both pages stay on one source of business data with no risk of the
+two drifting apart. Fetch paths resolve against the *document* that loaded the script, not
+against `app.js`'s own location — that's why this needed a variable rather than a
+hardcoded relative path.
+
+A `city/css/styles.css` `url()` path needs one more `../` than the same path in the root
+stylesheet, since the file itself sits one directory deeper — this bit the vendored font
+`@font-face` rules once already (they 404'd, invisibly falling back to a system font)
+before being caught by checking the network tab, not just eyeballing the page.
+
+If a future variant needs different behavior, not just a different look, that's the
+signal it needs its own `app.js` (and possibly its own `data/businesses.json`) instead of
+pointing back at the root's — the sharing exists because "look and feel" was explicitly
+the only intended difference, not because every future page under this repo should share
+logic with the root by default.
+
 ## Deploying
 
 Development happens on `november-2026` (renamed from `main`, which still exists but is

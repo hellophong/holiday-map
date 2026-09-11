@@ -1,0 +1,743 @@
+/* ---------------------------------------------------------------
+   The Merry Mile — flat illustrated styling
+   Modelled on a flat-vector winter scene: warm greige ground,
+   deep-purple ink, coral / teal / mint / gold accents, no outlines,
+   no gradients, no drop shadows.
+   --------------------------------------------------------------- */
+
+@font-face {
+  font-family: "Fredoka";
+  src: url("../../vendor/fonts/fredoka-latin-500-normal.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Fredoka";
+  src: url("../../vendor/fonts/fredoka-latin-600-normal.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nunito Sans";
+  src: url("../../vendor/fonts/nunito-sans-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nunito Sans";
+  src: url("../../vendor/fonts/nunito-sans-latin-500-normal.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nunito Sans";
+  src: url("../../vendor/fonts/nunito-sans-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  /* ground + ink */
+  --greige: #eae6e2;        /* the artwork's own ground colour */
+  --greige-warm: #f2efec;
+  --paper: #ffffff;
+  --ink: #3e2a56;
+  --ink-soft: #6b5a7c;
+
+  /* the scene palette */
+  --coral: #e54b3c;
+  --pink: #e697aa;
+  --salmon: #f3787b;
+  --purple: #633d7a;
+  --teal: #9fd0d2;
+  --teal-mid: #7cc4c8;
+  --pale-sage: #d3dfdd;
+  --mint: #cfe6e7;
+  --green: #2cac84;
+  --gold: #f8a92d;
+  --navy: #4d6998;
+  --deep-blue: #24536f;
+  --coral-text: #c33a2c;   /* AA-safe coral for text on white */
+
+  --radius-lg: 26px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+
+  --font-display: "Fredoka", ui-rounded, "Segoe UI", system-ui, sans-serif;
+  --font-body: "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; margin: 0; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--greige);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+a { color: var(--coral-text); }
+
+/* ---------------------------- Snowfall ---------------------------- */
+
+.snow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 900;
+  opacity: .8;
+  background-image:
+    radial-gradient(4.5px 4.5px at 40px 60px, #fff, transparent),
+    radial-gradient(4.0px 4.0px at 232px 158px, #fff, transparent),
+    radial-gradient(5.0px 5.0px at 138px 286px, #fff, transparent),
+    radial-gradient(3.0px 3.0px at 96px 34px, #fff, transparent),
+    radial-gradient(2.5px 2.5px at 20px 170px, #fff, transparent),
+    radial-gradient(3.0px 3.0px at 196px 118px, #fff, transparent),
+    radial-gradient(2.5px 2.5px at 150px 214px, #fff, transparent);
+  background-size:
+    360px 360px,
+    360px 360px,
+    360px 360px,
+    250px 250px,
+    250px 250px,
+    250px 250px,
+    250px 250px;
+  animation: snowfall 30s linear infinite;
+}
+
+/* Each layer shifts by a whole number of tiles per cycle so the loop has no
+   visible jump; the nearer, larger dots cover more ground per pass. */
+@keyframes snowfall {
+  from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+  to   { background-position: 360px 720px, 360px 720px, 360px 720px, -250px 500px, -250px 500px, -250px 500px, -250px 500px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .snow { animation: none; opacity: .55; }
+}
+
+/* ----------------------------- Banner ----------------------------- */
+
+.banner {
+  position: relative;
+  flex: none;
+  background: var(--greige);
+  color: var(--ink);
+  z-index: 800;
+  padding: 1.6rem 0 0;
+}
+
+.banner__inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+.banner__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3.4vw, 2.6rem);
+  line-height: 1;
+  margin: 0;
+  color: var(--purple);
+}
+
+/* "The 16th Annual" rides above the name at a fraction of its size */
+.banner__lead {
+  display: block;
+  font-size: .34em;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: .28em;
+}
+
+.banner__main {
+  display: block;
+  font-size: 1.5em;
+  font-weight: 600;
+  line-height: .95;
+  letter-spacing: -.015em;
+}
+
+.banner__subtitle {
+  margin: .25rem 0 0;
+  font-size: .92rem;
+  color: var(--ink-soft);
+}
+
+/* the illustrated band; the artwork's own ground colour matches --greige,
+   so it blends into the page rather than sitting in a box */
+.banner__scene {
+  width: 100%;
+  /* The artwork's drawn content occupies a fixed slice of its width
+     (~12.7%), so sizing the band in vw keeps every figure, chimney and
+     skate fully visible at any width instead of clipping them. The extra
+     0.9vw keeps a little of the file's headroom under the title. */
+  height: clamp(88px, 13.6vw, 262px);
+  margin-top: .45rem;
+}
+
+.banner__scene img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* trims the empty headroom and footer the file carries, keeping the
+     drawn band centred */
+  object-position: 50% 57%;
+}
+
+/* Stand-in for the real header image this variant is meant to get — a flat
+   dashed box rather than quietly reusing the original artwork, so this page
+   never passes for a finished second look before it has one. Delete once a
+   real image replaces the <img> in index.html. */
+.banner__scene--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--ink-soft, #6b5a7c);
+  border-radius: 12px;
+  background: var(--greige-warm, #f2efec);
+  color: var(--ink-soft, #6b5a7c);
+  font-size: .85rem;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+/* ----------------------------- Layout ----------------------------- */
+
+.layout {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(280px, 348px) 1fr;
+  gap: 1rem;
+  padding: .85rem 1.25rem 1.25rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ----------------------------- Sidebar ---------------------------- */
+
+.sidebar {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.sidebar__head {
+  padding: 1rem 1rem .8rem;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  background: var(--greige-warm);
+  border-radius: 999px;
+  padding: .5rem .9rem;
+}
+
+.search__icon {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  opacity: .55;
+}
+
+.search input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  font-size: .92rem;
+  background: transparent;
+  color: var(--ink);
+}
+
+.search input::placeholder { color: var(--ink-soft); opacity: .75; }
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin-top: .7rem;
+}
+
+.chip {
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 0;
+  border-radius: 999px;
+  padding: .32rem .7rem;
+  background: var(--greige-warm);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: .38rem;
+  transition: background-color .14s ease, color .14s ease;
+}
+
+.chip__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--chip-color, var(--green));
+  flex: none;
+}
+
+.chip:hover { background: var(--mint); }
+
+.chip[aria-pressed="true"] {
+  background: var(--ink);
+  color: #fff;
+}
+
+.chip:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* Directory cards */
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: .2rem .6rem 1rem;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  scrollbar-color: var(--teal-mid) transparent;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  background: var(--paper);
+  border-radius: var(--radius-sm);
+  padding: .45rem .55rem;
+  margin-bottom: .1rem;
+  cursor: pointer;
+  transition: background-color .14s ease;
+}
+
+.card:hover,
+.card.is-active { background: var(--greige-warm); }
+
+.card__num {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--card-color, var(--green));
+  color: var(--card-ink, #fff);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: .82rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+
+.card__name {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.cards__empty {
+  text-align: center;
+  padding: 2rem .5rem;
+  color: var(--ink-soft);
+}
+
+.sidebar__note {
+  flex: none;
+  margin: 0;
+  padding: .7rem 1rem .85rem;
+  background: var(--greige-warm);
+  font-size: .72rem;
+  color: var(--ink-soft);
+}
+
+/* ---------------------------- Map frame --------------------------- */
+
+.map-frame {
+  position: relative;
+  min-height: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--mint);
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+  background: var(--mint);
+}
+
+.noscript {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--ink);
+}
+
+/* ------------------------------ Pins ------------------------------ */
+
+.pin {
+  background: none !important;
+  border: 0 !important;
+}
+
+.pin__svg {
+  display: block;
+  transform-origin: 50% 100%;
+  transition: transform .16s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.pin:hover .pin__svg,
+.pin.is-active .pin__svg { transform: scale(1.16) translateY(-2px); }
+
+.pin.is-active .pin__svg { animation: hop .45s ease-in-out; }
+
+@keyframes hop {
+  0%, 100% { transform: scale(1.16) translateY(-2px); }
+  40%      { transform: scale(1.16) translateY(-7px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin__svg { transition: none; }
+  .pin.is-active .pin__svg { animation: none; }
+}
+
+/* --------------------------- Hover card --------------------------- */
+
+.leaflet-popup.merry-popup .leaflet-popup-content-wrapper {
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(62, 42, 86, .13);
+  padding: 0;
+}
+
+.leaflet-popup.merry-popup .leaflet-popup-content {
+  margin: 0;
+  width: 252px !important;
+  padding: .85rem .95rem .9rem;
+}
+
+.leaflet-popup.merry-popup .leaflet-popup-tip {
+  background: var(--paper);
+  box-shadow: none;
+}
+
+.leaflet-popup.merry-popup a.leaflet-popup-close-button { display: none; }
+
+.pop__ribbon {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: .3rem;
+}
+
+.pop__num {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: .72rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+
+.pop__name {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.3rem;
+  line-height: 1.15;
+  margin: 0 0 .25rem;
+  color: var(--ink);
+}
+
+.pop__blurb {
+  margin: 0;
+  font-size: .855rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.pop__details {
+  margin: .65rem 0 0;
+  font-size: .855rem;      /* matches the blurb; medium weight carries the emphasis */
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+
+.pop__details span {
+  display: flex;
+  align-items: flex-start;   /* keep the icon on the first line when text wraps */
+  gap: .42rem;
+}
+
+.pop__details svg { flex: none; opacity: .6; margin-top: .2em; }
+
+.leaflet-container a.pop__phone {
+  color: inherit;
+  text-decoration: none;
+}
+
+.leaflet-container a.pop__phone:hover { text-decoration: underline; }
+
+.leaflet-container a.pop__link {
+  display: inline-block;
+  margin-top: .7rem;
+  font-family: var(--font-body);
+  font-size: .82rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: #fff;
+  /* deep purple rather than the category colour: gold and pink can't carry
+     white label text at this size */
+  background: var(--ink);
+  border-radius: 999px;
+  padding: .4rem .95rem;
+  transition: filter .14s ease;
+}
+
+.leaflet-container a.pop__link:hover { filter: brightness(.92); }
+
+.leaflet-container a.pop__link:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* ------------------------ Leaflet chrome trim ---------------------- */
+
+.leaflet-container { font-family: var(--font-body); }
+
+.leaflet-control-zoom {
+  border: 0 !important;
+  box-shadow: 0 4px 14px rgba(62, 42, 86, .14) !important;
+  border-radius: 14px !important;
+  overflow: hidden;
+}
+
+.leaflet-control-zoom a {
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--greige) !important;
+  font-weight: 500;
+  font-family: var(--font-display);
+}
+
+.leaflet-control-zoom a:last-child { border-bottom: 0 !important; }
+.leaflet-control-zoom a:hover { background: var(--greige-warm) !important; }
+
+.leaflet-control-attribution {
+  background: rgba(255, 255, 255, .82) !important;
+  color: var(--ink-soft) !important;
+  font-size: 10px;
+  border-radius: 10px 0 0 0;
+  padding: 2px 7px !important;
+}
+
+.leaflet-control-attribution a { color: var(--ink-soft) !important; }
+
+.map-legend {
+  background: var(--paper);
+  border-radius: var(--radius-md);
+  box-shadow: 0 6px 18px rgba(62, 42, 86, .12);
+  padding: .7rem .85rem;
+  font-size: .76rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.map-legend h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: .95rem;
+  margin: 0 0 .25rem;
+  color: var(--ink);
+}
+
+.map-legend ul { margin: 0; padding: 0; }
+
+.map-legend li {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  color: var(--ink-soft);
+}
+
+/* shared by the on-map legend and the mobile legend strip below */
+.swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--swatch, var(--green));
+  flex: none;
+}
+
+/* Mobile-only legend, replacing the on-map corner box. Wraps to as many
+   lines as it needs rather than scrolling, so every category is visible at
+   once. Hidden above 860px — see the media query at the bottom for its
+   mobile styling. */
+.legend-strip {
+  display: none;
+}
+
+/* Plain dot + label, matching the desktop on-map legend's own type and
+   swatch size exactly — this is that same list turned sideways, not another
+   chip. No pill background or shadow; entries are told apart by the row's
+   gap alone, the way lines in the desktop list are told apart by wrapping. */
+.legend-item {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  font-size: .76rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* Fixed "back to list" button. Only ever shown on mobile — see the media
+   query — where the sidebar and map are far apart in the scroll and a click
+   on a business needs a quick way back. */
+.back-to-top {
+  display: none;
+}
+
+.tile-warning {
+  max-width: 17rem;
+  line-height: 1.5;
+}
+
+.tile-warning h2 { color: var(--coral); }
+
+.tile-warning code {
+  background: var(--greige-warm);
+  border-radius: 4px;
+  padding: 0 .25em;
+  font-size: .95em;
+}
+
+/* ---------------------------- Responsive --------------------------- */
+
+@media (max-width: 860px) {
+  body { overflow: auto; }
+
+  .layout {
+    grid-template-columns: 1fr;
+    /* extra bottom padding clears the fixed "back to list" button — without
+       it the button sits on top of the legend strip, the last thing on the
+       page */
+    padding: .75rem .8rem 4.5rem;
+    /* stop the grid shrinking to the leftover viewport height: stacked, it
+       should take its content height and let the page scroll instead */
+    flex: 0 0 auto;
+    min-height: auto;
+  }
+
+  .banner { padding: 1.1rem 0 0; }
+  .banner__inner { padding: 0 1rem; }
+  .banner__scene { height: 88px; }
+
+  /* Tall enough that a full popup card (address + hours + phone can run to
+     ~440px) fits without the map's rounded-corner clip cutting it off —
+     mobile already scrolls the page, so there's no fixed-viewport limit
+     working against this the way there is on desktop. */
+  .map-frame { height: 72vh; min-height: 460px; }
+
+  /* Stacked on narrow screens the sidebar has no fixed height to scroll
+     inside, so let the list flow and the page itself scroll — otherwise the
+     flex column collapses the card area to nothing. */
+  .sidebar { max-height: none; }
+
+  .cards {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+
+  /* The on-map legend corner covers a real chunk of a phone-sized map —
+     hide it and run the same key horizontally underneath instead. */
+  .map-legend { display: none; }
+
+  /* The category chips repeat what the legend strip now shows right below
+     the map, so they're dropped here to shorten the list you scroll past to
+     reach it. Typing a category name into search still narrows by it. */
+  .filters { display: none; }
+
+  .legend-strip {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: .5rem;
+    column-gap: 1.1rem;
+    padding: .7rem .2rem 0;
+  }
+
+  .back-to-top {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 1000;
+    border: 0;
+    border-radius: 999px;
+    padding: .55rem 1rem;
+    background: var(--ink);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: .82rem;
+    font-weight: 700;
+    box-shadow: 0 6px 18px rgba(62, 42, 86, .3);
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+
+  .back-to-top svg { width: 14px; height: 14px; flex: none; }
+
+  .back-to-top.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+}
+
+@media (max-width: 860px) and (prefers-reduced-motion: reduce) {
+  .back-to-top { transition: none; }
+}

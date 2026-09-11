@@ -12,7 +12,12 @@
      window.STADIA_API_KEY before this script runs), or allowlist the domain
      on your Stadia property. */
   var STADIA_API_KEY = window.STADIA_API_KEY || "";
-  var DATA_URL = "data/businesses.json";
+  /* Overridable so a second themed page (e.g. /city/) can point back at this
+     one's data — see window.STADIA_API_KEY just above for the same pattern.
+     Fetch URLs resolve relative to the HTML document that loaded this
+     script, not to app.js's own location, which is why a shared script
+     needs this rather than a hardcoded relative path. */
+  var DATA_URL = window.DATA_URL || "data/businesses.json";
   var HOVER_CLOSE_DELAY = 260; // ms of grace to travel from pin to card
 
   /* Mirrors the CSS breakpoint that stacks the sidebar above the map. Used
