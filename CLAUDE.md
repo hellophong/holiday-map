@@ -137,6 +137,7 @@ stale, and a wrong time in a holiday guide sends someone to a locked door.
 
 ## Deploying
 
-GitHub Pages serves `main`. Development happens on `claude/christmas-business-map-h7galy`;
-both branches are kept at the same commit. The repo owner also pushes directly to the
-branch, so fetch before pushing and merge rather than rebase if it has moved.
+Development happens on `november-2026` (renamed from `main`, which still exists but is
+no longer kept in sync — confirm in Settings → Pages which branch actually deploys
+before assuming either one is live). The repo owner also pushes directly to
+`november-2026`, so fetch before pushing and merge rather than rebase if it has moved.
