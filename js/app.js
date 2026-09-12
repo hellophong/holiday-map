@@ -18,6 +18,15 @@
      script, not to app.js's own location, which is why a shared script
      needs this rather than a hardcoded relative path. */
   var DATA_URL = window.DATA_URL || "data/businesses.json";
+  /* Same override pattern as the two above, opted into only by a page that
+     actually has a light/dark toggle (city/index.html sets this before
+     loading the script) — see effectiveTileTheme() and refreshTileStyle()
+     down in the Tiles section. Without it, this script has no business
+     reading document.documentElement's data-theme or the OS colour-scheme
+     preference at all: the root page has no dark palette for a dark tile
+     to match, so a visitor whose OS prefers dark must never get dark tiles
+     under a light page there. */
+  var THEME_AWARE = !!window.THEME_AWARE;
   var HOVER_CLOSE_DELAY = 260; // ms of grace to travel from pin to card
 
   /* Mirrors the CSS breakpoint that stacks the sidebar above the map. Used
@@ -60,11 +69,31 @@
   };
 
   var map;
+  var tileLayer;
 
   /* --------------------------- Tiles --------------------------- */
 
   function key(suffix) {
     return STADIA_API_KEY ? suffix + "?api_key=" + encodeURIComponent(STADIA_API_KEY) : suffix;
+  }
+
+  var TILE_STYLES = { light: "alidade_smooth", dark: "alidade_smooth_dark" };
+
+  function tileUrl(style) {
+    return key("https://tiles.stadiamaps.com/tiles/" + style + "/{z}/{x}/{y}{r}.png");
+  }
+
+  /* Only ever asked on a THEME_AWARE page (city/index.html) — see the
+     comment on that flag up top. Mirrors the same explicit-choice-first,
+     OS-preference-otherwise rule the CSS itself follows, so the tiles
+     never disagree with the chrome around them: an explicit data-theme
+     wins outright, and only when there isn't one does the OS preference
+     get a vote. */
+  function effectiveTileTheme() {
+    if (!THEME_AWARE) return "light";
+    var explicit = document.documentElement.getAttribute("data-theme");
+    if (explicit === "light" || explicit === "dark") return explicit;
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   }
 
   function addTiles() {
@@ -73,17 +102,31 @@
       '&copy; <a href="https://openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> ' +
       '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
 
-    /* Alidade Smooth carries its own lettering, so it needs no separate
-       labels overlay. */
-    var base = L.tileLayer(key("https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"), {
+    /* Alidade Smooth (and its Dark counterpart) carry their own lettering,
+       so neither needs a separate labels overlay. */
+    tileLayer = L.tileLayer(tileUrl(TILE_STYLES[effectiveTileTheme()]), {
       minZoom: 1,
       maxZoom: 20,
       attribution: attribution
     }).addTo(map);
 
-    base.on("tileload", onTileLoad);
-    base.on("tileerror", onTileError);
+    tileLayer.on("tileload", onTileLoad);
+    tileLayer.on("tileerror", onTileError);
   }
+
+  /* The only piece of this file a THEME_AWARE page's own toggle script
+     needs to know about: call window.refreshMapTileStyle() after flipping
+     data-theme (or after an OS colour-scheme change with no explicit
+     pick), and the basemap swaps to match. Leaflet's own setUrl() reloads
+     just the currently visible tiles under the new template — the same
+     tileLayer instance, so the tileload/tileerror listeners above stay
+     bound and the tile-failure notice keeps working across a swap. A
+     no-op before the map exists or on a page that never opted in. */
+  function refreshTileStyle() {
+    if (!THEME_AWARE || !tileLayer) return;
+    tileLayer.setUrl(tileUrl(TILE_STYLES[effectiveTileTheme()]));
+  }
+  window.refreshMapTileStyle = refreshTileStyle;
 
   /* ----------------------- Tile health notice --------------------- */
   /* A single failed tile at the edge of the view is just noise. Only say

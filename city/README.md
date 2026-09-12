@@ -109,3 +109,13 @@ Every colour token in `css/styles.css` is written three times on purpose: once b
 pick), and once under `:root[data-theme="dark"]` (so an explicit dark pick applies
 regardless of the OS setting). All three need updating together if a token's value ever
 changes.
+
+The basemap follows the same rule: `js/app.js` loads Stadia's `alidade_smooth_dark`
+instead of `alidade_smooth` when the effective theme is dark, gated behind
+`window.THEME_AWARE = true` (set in the `<script>` right before `js/app.js` loads, next
+to `window.DATA_URL`) so the root page — which has no dark palette at all — never has its
+map tiles follow a visitor's OS preference on its own. The toggle's click handler calls
+`window.refreshMapTileStyle()` (defined by `js/app.js` once the map exists) right after
+flipping `data-theme`, which swaps the live tile layer's URL via Leaflet's `setUrl()` —
+no page reload, no rebuilding the layer. The OS-preference `change` listener calls it too,
+for a visitor who never made an explicit pick and whose system flips theme mid-visit.

@@ -202,12 +202,28 @@ it.
 
 ## Map tiles
 
-Single layer, `alidade_smooth`, zoom 1–20, `{r}` for HiDPI. It carries its own street
-lettering, so no labels overlay. Stadia serves key-free on `localhost`/`127.0.0.1` only;
-any other origin needs an API key in `STADIA_API_KEY` or an allowlisted domain, or every
-tile returns 401. The tile-failure notice waits for three failures with nothing painted —
-so one unlucky tile doesn't trigger it — and removes itself if tiles start arriving.
-Attribution for Stadia, OpenMapTiles and OpenStreetMap must stay visible.
+Single layer, `alidade_smooth` (or its dark counterpart — see below), zoom 1–20, `{r}`
+for HiDPI. It carries its own street lettering, so no labels overlay. Stadia serves
+key-free on `localhost`/`127.0.0.1` only; any other origin needs an API key in
+`STADIA_API_KEY` or an allowlisted domain, or every tile returns 401. The tile-failure
+notice waits for three failures with nothing painted — so one unlucky tile doesn't
+trigger it — and removes itself if tiles start arriving. Attribution for Stadia,
+OpenMapTiles and OpenStreetMap must stay visible.
+
+**Which style loads is gated behind `THEME_AWARE`, read only from `window.THEME_AWARE`.**
+`js/app.js` can pick between `alidade_smooth` and `alidade_smooth_dark` based on
+`data-theme` / `prefers-color-scheme` (`effectiveTileTheme()`), and `refreshTileStyle()`
+— exposed as `window.refreshMapTileStyle()` — lets a page swap the live layer's URL after
+load via Leaflet's own `setUrl()`, without tearing down and recreating the layer (so the
+`tileload`/`tileerror` listeners, and the tile-failure notice they drive, keep working
+across a swap). None of this activates unless the page opts in by setting
+`window.THEME_AWARE = true` before loading the script (`city/index.html` does; the root
+page never does). That gate matters: the root page has no dark palette at all, so if this
+read the OS colour-scheme unconditionally, a visitor whose system prefers dark would get
+dark tiles under root's *light-only* chrome — a mismatch nothing else on the page would
+account for. `city/index.html`'s own toggle script calls `refreshMapTileStyle()` right
+after it changes `data-theme` (and again if the OS preference changes live with no
+explicit choice saved) — that call is the only reason the tiles ever change after load.
 
 ## Content conventions
 

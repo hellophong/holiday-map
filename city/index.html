@@ -104,6 +104,12 @@
     // Point the shared app.js at the parent folder's data, rather than forking
     // a second copy of the same eleven businesses that would drift out of sync.
     window.DATA_URL = "../data/businesses.json";
+    // Opts app.js into reading data-theme / prefers-color-scheme for which
+    // basemap style to load (Alidade Smooth vs. its Dark counterpart) — see
+    // the THEME_AWARE comment in js/app.js. The root page never sets this,
+    // so its map is never at the mercy of a visitor's OS colour scheme
+    // when its own chrome has no dark palette to match.
+    window.THEME_AWARE = true;
   </script>
   <script src="../js/app.js"></script>
   <script>
@@ -126,11 +132,19 @@
         label.textContent = isDark ? "Light mode" : "Dark mode";
       }
 
+      // app.js defines this once its map exists — guarded here too since
+      // this script can in principle run before that (script order makes
+      // it very unlikely, but costs nothing to check).
+      function refreshTiles() {
+        if (window.refreshMapTileStyle) window.refreshMapTileStyle();
+      }
+
       toggle.addEventListener("click", function () {
         var next = effectiveTheme() === "dark" ? "light" : "dark";
         root.setAttribute("data-theme", next);
         try { localStorage.setItem("cityTheme", next); } catch (err) { /* private mode, etc. — toggle still works this load */ }
         sync();
+        refreshTiles();
       });
 
       // Only follow a live OS theme change while the visitor hasn't picked
@@ -138,7 +152,10 @@
       // what the system does around it.
       if (media && media.addEventListener) {
         media.addEventListener("change", function () {
-          if (!root.getAttribute("data-theme")) sync();
+          if (!root.getAttribute("data-theme")) {
+            sync();
+            refreshTiles();
+          }
         });
       }
 
