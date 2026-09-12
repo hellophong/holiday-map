@@ -28,33 +28,44 @@ Two separate illustrations, not one image resized — `index.html` uses `<pictur
 square street-corner scene: the GIFTS shopfront, a snowman, the Richmond Magazine sign)
 rather than a narrower slice of the wide desktop banner.
 
-Both `-nobg` files are transparent — no sky rect of their own — which is what makes two
-things possible at once: the art spans the *entire window width* (`.banner__scene { width:
-100% }`, sitting outside `.banner__inner`'s 1400px-max reading column so nothing narrows
-it), and the headline sits *overlapping* it rather than stacked above it in its own block.
-`.banner__scene` is pulled up with a negative `margin-top` to tuck under the header text;
-it only reads as "under the text" instead of "on top of it" because the art carries a
-margin of plain sky above its own rooflines, and the negative value is kept smaller than
-that — confirmed by literally decoding the rendered SVG's alpha channel and finding the
-first non-transparent row, not eyeballed, since "how much clear sky is there" isn't
-something you can read off the source file's viewBox. Both breakpoints have their own
-number (mobile's composition carries a different margin) — see the comment above
-`.banner__scene` for how to re-check it if a future asset swap changes that margin.
+Both `-nobg` files are transparent — no sky rect of their own — which is what makes the
+headline sit *overlapping* the art rather than stacked above it in its own block, on both
+breakpoints: `.banner__scene` (or its img, on desktop — see below) is pulled up with a
+small negative `margin-top` to tuck under the header text, and it only reads as "under the
+text" instead of "on top of it" because the art carries a margin of plain sky above its
+own rooflines and the negative value is kept smaller than that. That margin isn't
+something you can read off the source file's viewBox — it's confirmed by literally
+decoding the rendered art's alpha channel at its real on-page size and finding the first
+non-transparent row. A version with a background rect (the original `holiday-header2.svg`
+/ `-mobile.svg`, still in `assets/` but unused) couldn't do this at all: cropping it down
+to a band (`object-fit: cover`) is what an older version of this file described, and that
+crop is fundamentally at odds with an overlapping banner.
 
-A version with a background rect (the original `holiday-header2.svg` / `-mobile.svg`,
-still in `assets/` but unused) can't do either of those: cropping it down to a band (via
-`object-fit: cover`) is what the old version of this file described, and that crop is
-fundamentally at odds with an edge-to-edge, overlapping banner — don't switch back to a
-background-carrying asset without rethinking this section along with it.
+**Desktop and mobile size the art completely differently, though** — this isn't just a
+breakpoint tweak, it's two different strategies:
 
-Nothing here caps how tall the art can get on a wide desktop window (earlier drafts of
-this did, specifically to protect the fixed one-viewport layout below — `.layout { flex: 1
-1 auto }`, no page scroll — from being squeezed). A very short, wide browser window (a
-1280×720 laptop, say) does end up with a visibly smaller map underneath as a result; it's
-still fully usable, and the popup's own `maxHeight` safety net (see the root's
+- **Desktop** caps the whole banner (`.banner`) at `height: 25vh` (a `min-height` floor
+  protects the headline text on very short windows) so the sidebar/map stay the visually
+  dominant part of the page rather than competing with the header — an explicit ask after
+  an earlier draft let the banner grow as tall as the art's own ratio implied on a wide
+  window, which made the header the biggest thing on the screen. `.banner__scene` is
+  `flex: 1 1 auto` inside that fixed-height column, so it only ever gets whatever's left
+  after the headline text's own height, and the img is `object-fit: contain` within that —
+  never cropped, but also usually well short of full window width, since there generally
+  isn't much leftover height to work with at a 25vh cap. The overlap margin here is a small
+  *positive* gap, not a pull-up: at this size the art's own clear-sky margin shrinks (in
+  real pixels) right along with it, down to a few px — nowhere near enough room to safely
+  pull it up under the text the way the taller, uncapped version could.
+- **Mobile** doesn't have a fixed-viewport layout to protect (the page already scrolls), so
+  none of that applies: the art renders at its full natural size, `width: 100%` of the
+  window, and *does* get pulled up under the text with a real negative margin, the same way
+  desktop's used to before the 25vh cap.
+
+A short, wide desktop window (1280×720, say) still ends up with a visibly smaller map
+underneath than a taller one — the fixed 25vh eats a bigger fraction of a short window —
+but it stays fully usable, and the popup's own `maxHeight` safety net (see the root's
 `CLAUDE.md`) is exactly the thing designed to cover a short desktop window regardless of
-what's above the map, so this wasn't treated as a regression worth trading the full-bleed
-look away for.
+what's above the map.
 
 Neither file was drawn with a night sky, so dark mode doesn't swap in a second image — it
 darkens and cools the one it has (`filter: brightness() saturate() hue-rotate()`), which
