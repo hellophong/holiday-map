@@ -264,61 +264,48 @@ a { color: var(--brick); }
 }
 
 /* the illustrated band; art-directed per breakpoint via <picture> in
-   index.html, not just resized — see /city/README.md */
+   index.html, not just resized — see /city/README.md. Both source files
+   are transparent (no sky rect of their own — the -nobg assets). Rather
+   than cropping to a fixed band the way a "cover" fit would, this caps
+   how *tall* the art can get and otherwise lets it render at its own
+   natural ratio — nothing is ever cut off the top or bottom, and the
+   page's own background (not a mismatched illustrated sky) shows through
+   everywhere the art doesn't draw, so there's no seam to speak of between
+   the two. The max-height is what keeps a wide desktop window from
+   turning the whole banner into as tall as the art's own ratio implies
+   and squeezing the fixed-viewport layout below it; on an unusually
+   narrow window max-width takes over first and shrinks it instead — one
+   of the two always binds, the image is simply never cropped either way. */
 .banner__scene {
-  position: relative;
-  display: block;
+  display: flex;
+  justify-content: center;
   width: 100%;
-  height: clamp(88px, 13.6vw, 262px);
   margin-top: .6rem;
-  background: var(--sky-deep);
 }
 
 .banner__scene img {
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* Both source images carry a band of plain sky above the rooftops (the
-     mobile crop's own snowman-and-shopfront scene sits lower still) — this
-     keeps the buildings-and-street band in frame instead of showing mostly
-     empty sky, without touching the files themselves. */
-  object-position: 50% 82%;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 260px;
 }
 
-/* Night sky doesn't literally exist in either source file — both were
-   drawn for a daytime sky. Rather than needing a whole second illustration
-   per theme, darkening and cooling the one we have here reads as "dusk"
-   well enough to sit alongside the dark palette instead of clashing with
-   it. The filter alone still left a hard seam where the page's own dark
-   background met the (still fairly pale) sky band, so a soft gradient —
-   var(--sky) fading to transparent — is layered over the top of the image
-   on top of that to ease into it, the same trick a photo editor's
-   graduated filter does. */
-.banner__scene::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0;
-  background: linear-gradient(to bottom, var(--sky) 0%, rgba(11, 27, 44, 0) 40%);
-}
-
+/* Night sky doesn't literally exist in the source files — both were
+   drawn for a daytime sky. Rather than needing a whole second
+   illustration per theme, darkening and cooling the one already there
+   reads as dusk well enough to sit alongside the dark palette. This is
+   the one piece a gradient-fade trick doesn't help with any more now
+   that the art has no background rect to blend: there's no seam to hide
+   in the first place, since the transparent surroundings already show
+   the page's own (dark) background directly. */
 :root[data-theme="dark"] .banner__scene img {
   filter: brightness(.55) saturate(.75) hue-rotate(-6deg);
-}
-
-:root[data-theme="dark"] .banner__scene::after {
-  opacity: .55;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .banner__scene img {
     filter: brightness(.55) saturate(.75) hue-rotate(-6deg);
-  }
-
-  :root:not([data-theme="light"]) .banner__scene::after {
-    opacity: .55;
   }
 }
 
@@ -784,11 +771,11 @@ a { color: var(--brick); }
 
   /* The mobile crop is its own, roughly-square composition (snowman,
      GIFTS shopfront, the Richmond Magazine sign) rather than a thin slice
-     of the wide desktop scene, so it earns noticeably more height than
-     root's compact 88px mobile band — tall enough to read as a real
-     header, short enough that the directory is still one scroll away. */
-  .banner__scene { height: 46vw; min-height: 168px; max-height: 260px; }
-  .banner__scene img { object-position: 50% 78%; }
+     of the wide desktop scene, and mobile has no fixed-viewport layout
+     fighting it for space below (the page just scrolls) — so the cap can
+     be more generous than desktop's without squeezing anything. Uncropped,
+     it reads as a real header rather than root's compact 88px band. */
+  .banner__scene img { max-height: 320px; }
 
   /* Tall enough that a full popup card (address + hours + phone can run to
      ~440px) fits without the map's rounded-corner clip cutting it off —

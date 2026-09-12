@@ -11,7 +11,7 @@ the repo root rather than replacing it. Both are live at once:
 | Shared from the parent folder | Owned by `/city/` |
 |---|---|
 | `../vendor/leaflet/`, `../vendor/fonts/` | `css/styles.css` — a snowy Richmond storefront street, not the original's flat illustrated scene |
-| `../js/app.js` — same map/popup/filter logic | The header artwork — `assets/holiday-header2.svg` (desktop), `assets/holiday-header2-mobile.svg` (≤860px) |
+| `../js/app.js` — same map/popup/filter logic | The header artwork — `assets/holiday-header2-nobg.svg` (desktop), `assets/holiday-header2-mobile-nobg.svg` (≤860px) |
 | `../data/businesses.json` — same 11 listings | This `index.html`, including the light/dark toggle |
 
 `index.html` sets `window.DATA_URL = "../data/businesses.json"` before loading the shared
@@ -26,17 +26,32 @@ need its own `app.js` / `data/businesses.json` instead of pointing back at the p
 Two separate illustrations, not one image resized — `index.html` uses `<picture>` with a
 `(max-width: 860px)` source, since the mobile crop is composed differently (a roughly
 square street-corner scene: the GIFTS shopfront, a snowman, the Richmond Magazine sign)
-rather than a narrower slice of the wide desktop banner. Both carry a band of plain sky
-above the rooflines; `.banner__scene img { object-position }` crops down to the
-buildings-and-street band rather than showing mostly empty sky — see the comment in
-`css/styles.css` if that crop ever needs retuning against a new pair of images (the two
-breakpoints are cropped independently, in the base rule and the `≤860px` media query).
+rather than a narrower slice of the wide desktop banner.
 
-Neither file was drawn with a night sky, so dark mode doesn't swap in a second image —
-it darkens and cools the one it has (`filter: brightness() saturate() hue-rotate()`) and
-layers a soft gradient over the top edge to blend into the page background, which reads as
-dusk well enough without needing a whole second illustration per theme. If a real
-night-sky version ever gets drawn, swap it in via the same `[data-theme="dark"]` /
+Both `-nobg` files are transparent — no sky rect of their own — which is what makes the
+banner read as seamless: `.banner__scene img` is sized by `max-width: 100%` /
+`max-height` (260px desktop, 320px mobile) and nothing else, the plain "cap whichever
+dimension would otherwise overflow" pattern an ordinary `<img>` already gives you for
+free. Nothing here ever crops the art — nothing needed to, once it had no background of
+its own to crop *down to* a band. A version with a background rect (the original
+`holiday-header2.svg` / `-mobile.svg`, still in `assets/` but unused) would need cropping
+again to avoid showing a mismatched rectangle of illustrated sky; don't switch back to one
+without also reintroducing that `object-fit: cover` + `object-position` handling.
+
+The max-height figures exist for desktop's sake, not the art's: the fixed one-viewport
+layout below the banner (`.layout { flex: 1 1 auto }`, no page scroll) gets squeezed if
+the banner is allowed to grow as tall as the illustration's own ratio implies on a wide
+window, so it's capped — the image just renders smaller (and narrower, `max-width` and
+`max-height` shrinking it together) rather than ever being cut off. Mobile has no such
+fight (the page already scrolls), hence the taller cap there.
+
+Neither file was drawn with a night sky, so dark mode doesn't swap in a second image — it
+darkens and cools the one it has (`filter: brightness() saturate() hue-rotate()`), which
+reads as dusk well enough without needing a whole second illustration per theme. That's
+the *only* treatment dark mode needs now: with no background rect to blend, there's no
+seam left for a gradient overlay to hide (an earlier version of this had one, for the
+previous background-carrying assets — removed along with them). If a real night-sky
+version ever gets drawn, swap it in via the same `[data-theme="dark"]` /
 `prefers-color-scheme` pair already used for the CSS variables below, rather than fighting
 the filter approach further.
 
