@@ -221,9 +221,16 @@ stale, and a wrong time in a holiday guide sends someone to a locked door.
 `city/` is a second theme for the same guide, live alongside the root at
 `/holiday-map/city/` rather than replacing it — see `city/README.md` for the full
 breakdown. It shares `../vendor/`, `../js/app.js`, and `../data/businesses.json` with the
-root; it owns its `index.html` and `css/styles.css`. Nothing here is a copy-paste fork of
-the whole site — only what's meant to actually differ (the look, eventually the header
-image) lives in `city/` at all.
+root; it owns its `index.html`, `css/styles.css`, and its own header artwork in
+`city/assets/`. Nothing here is a copy-paste fork of the whole site — only what's meant to
+actually differ (the look, the header image, a light/dark toggle) lives in `city/` at all.
+
+Its `numberStyle()`-driven pin/badge contrast is one exception worth knowing about: that
+math lives in the shared `js/app.js` with a hardcoded fallback ink colour (the root's
+purple), so a category swatch that needs deepening for contrast can land on a
+purple-tinted dark rather than city's own navy. That's shared *behavior*, not shared
+*look*, so it wasn't forked over this — see `city/README.md`'s palette section before
+"fixing" it locally.
 
 `js/app.js` reads `DATA_URL` from `window.DATA_URL || "data/businesses.json"` for exactly
 this: `city/index.html` sets `window.DATA_URL = "../data/businesses.json"` before loading

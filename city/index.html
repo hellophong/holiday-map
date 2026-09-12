@@ -3,23 +3,49 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The 16th Annual Holiday Guide — City Edition (draft)</title>
+  <title>The 16th Annual Holiday Guide — City Edition</title>
   <meta name="description" content="Map of Richmond, VA Christmas shops, bakeries, tree farms and makers." />
+
+  <!-- Set before any CSS paints, so the page never flashes light-then-dark
+       (or vice versa) on load. Only ever writes an *explicit* choice — a
+       visitor who hasn't touched the toggle gets prefers-color-scheme via
+       CSS alone, with nothing here to fight it. -->
+  <script>
+    (function () {
+      var saved = localStorage.getItem("cityTheme");
+      if (saved === "light" || saved === "dark") {
+        document.documentElement.setAttribute("data-theme", saved);
+      }
+    })();
+  </script>
 
   <!-- A second look-and-feel for the same guide, living alongside the original at
        /holiday-map/ rather than replacing it — see /city/README.md. Leaflet, the
        typefaces, the map logic and the business data are all shared from the
-       parent folder; only this stylesheet (and, once it exists, a new header
-       image) are meant to diverge. -->
+       parent folder; only this stylesheet and the header artwork diverge. -->
   <link rel="stylesheet" href="../vendor/leaflet/leaflet.css" />
   <link rel="stylesheet" href="css/styles.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='13' r='9' fill='%23e54b3c'/><rect x='15' y='20' width='2' height='9' fill='%23633d7a'/></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='13' r='9' fill='%23a6221a'/><rect x='15' y='20' width='2' height='9' fill='%231e2f45'/></svg>" />
 </head>
 <body>
   <div class="snow" aria-hidden="true"></div>
 
   <header class="banner">
     <div class="banner__inner">
+      <button type="button" id="themeToggle" class="theme-toggle">
+        <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <circle cx="10" cy="10" r="4.2" fill="currentColor" />
+          <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <path d="M10 1.6v2.3M10 16.1v2.3M18.4 10h-2.3M3.9 10H1.6" />
+            <path d="M15.6 4.4l-1.6 1.6M6 14l-1.6 1.6M15.6 15.6L14 14M6 6L4.4 4.4" />
+          </g>
+        </svg>
+        <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M17.3 12.3A7.3 7.3 0 0 1 7.7 2.7a7.3 7.3 0 1 0 9.6 9.6z" fill="currentColor" />
+        </svg>
+        <span class="theme-toggle__label"></span>
+      </button>
+
       <h1 class="banner__title" id="siteTitle">
         <span class="banner__lead" id="siteTitleLead">The 16th Annual</span>
         <span class="banner__main" id="siteTitleMain">Holiday Guide</span>
@@ -27,12 +53,14 @@
       <p class="banner__subtitle" id="siteSubtitle">Shop Local For Gifts And More</p>
     </div>
 
-    <!-- Placeholder — deliberately not the original SVG, so this doesn't quietly
-         pass as a finished second look. Swap for a real header image once one
-         exists; see /city/README.md for what to hand back for that. -->
-    <div class="banner__scene banner__scene--placeholder">
-      <span>New header image goes here</span>
-    </div>
+    <!-- Art-directed, not just resized: the mobile crop is a differently
+         composed version of the same street (see /city/README.md), so this
+         needs <picture>'s source-per-breakpoint rather than one <img> at a
+         single fixed aspect ratio. -->
+    <picture class="banner__scene">
+      <source media="(max-width: 860px)" srcset="assets/holiday-header2-mobile.svg" />
+      <img src="assets/holiday-header2.svg" alt="" aria-hidden="true" width="2062" height="477" />
+    </picture>
   </header>
 
   <main class="layout">
@@ -78,5 +106,44 @@
     window.DATA_URL = "../data/businesses.json";
   </script>
   <script src="../js/app.js"></script>
+  <script>
+    (function () {
+      var toggle = document.getElementById("themeToggle");
+      var label = toggle.querySelector(".theme-toggle__label");
+      var root = document.documentElement;
+      var media = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+
+      function effectiveTheme() {
+        var explicit = root.getAttribute("data-theme");
+        if (explicit === "light" || explicit === "dark") return explicit;
+        return media && media.matches ? "dark" : "light";
+      }
+
+      function sync() {
+        var isDark = effectiveTheme() === "dark";
+        toggle.setAttribute("aria-pressed", String(isDark));
+        toggle.setAttribute("aria-label", isDark ? "Switch to light mode" : "Switch to dark mode");
+        label.textContent = isDark ? "Light mode" : "Dark mode";
+      }
+
+      toggle.addEventListener("click", function () {
+        var next = effectiveTheme() === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        try { localStorage.setItem("cityTheme", next); } catch (err) { /* private mode, etc. — toggle still works this load */ }
+        sync();
+      });
+
+      // Only follow a live OS theme change while the visitor hasn't picked
+      // a side themselves — an explicit choice should stick regardless of
+      // what the system does around it.
+      if (media && media.addEventListener) {
+        media.addEventListener("change", function () {
+          if (!root.getAttribute("data-theme")) sync();
+        });
+      }
+
+      sync();
+    })();
+  </script>
 </body>
 </html>

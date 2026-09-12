@@ -1,8 +1,10 @@
 /* ---------------------------------------------------------------
-   The Merry Mile — flat illustrated styling
-   Modelled on a flat-vector winter scene: warm greige ground,
-   deep-purple ink, coral / teal / mint / gold accents, no outlines,
-   no gradients, no drop shadows.
+   The Merry Mile — City Edition
+   A snowy Richmond storefront street (see assets/holiday-header2*.svg)
+   instead of the root's flat illustrated scene: brick reds, mustard gold,
+   evergreen and denim blue lifted straight out of that artwork, on a pale
+   winter-sky ground. Supports a light/dark toggle — see the theme block
+   below and the inline script in index.html.
    --------------------------------------------------------------- */
 
 @font-face {
@@ -40,28 +42,33 @@
   font-display: swap;
 }
 
+/* ----------------------------- Theme ------------------------------- */
+/* Light values live bare on :root. Dark overrides are written twice on
+   purpose: once under prefers-color-scheme for a visitor who has never
+   touched the toggle, and again under [data-theme="dark"] for one who
+   explicitly asked for it regardless of their OS setting — the
+   :not([data-theme="light"]) guard on the first block keeps an explicit
+   "light" pick from being fought by a dark OS preference. index.html's
+   inline script is what sets data-theme, before first paint, from
+   localStorage. */
 :root {
-  /* ground + ink */
-  --greige: #eae6e2;        /* the artwork's own ground colour */
-  --greige-warm: #f2efec;
-  --paper: #ffffff;
-  --ink: #3e2a56;
-  --ink-soft: #6b5a7c;
+  --sky: #dff6f8;           /* day sky — a lighter wash of the artwork's own background */
+  --sky-deep: #c6f5fa;      /* the artwork's exact sky; used where more saturation reads better */
+  --sky-warm: #f2f3ec;      /* warm-neutral surface: search bar, hovers, notes */
+  --paper: #fffffa;         /* warm white, matches the artwork's snow highlights */
+  --ink: #1e2f45;           /* deep navy roofline — stands in for the root's purple */
+  --ink-soft: #4a637a;      /* a shade past the artwork's own #5b7991 — that one only just
+                                cleared 4.5:1 on --paper and fell short on --sky-warm */
+  --title: #415896;         /* denim, distinct from body ink for the banner title */
+
+  --shadow: 12, 22, 36;     /* rgb triplet for box-shadow rgba(), navy rather than the root's purple */
 
   /* the scene palette */
-  --coral: #e54b3c;
-  --pink: #e697aa;
-  --salmon: #f3787b;
-  --purple: #633d7a;
-  --teal: #9fd0d2;
-  --teal-mid: #7cc4c8;
-  --pale-sage: #d3dfdd;
-  --mint: #cfe6e7;
-  --green: #2cac84;
-  --gold: #f8a92d;
-  --navy: #4d6998;
-  --deep-blue: #24536f;
-  --coral-text: #c33a2c;   /* AA-safe coral for text on white */
+  --brick: #a6221a;
+  --terracotta: #df693d;
+  --gold: #eba433;
+  --evergreen: #2a7867;
+  --denim: #79b6de;
 
   --radius-lg: 26px;
   --radius-md: 18px;
@@ -71,6 +78,32 @@
   --font-body: "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --sky: #0b1b2c;
+    --sky-deep: #0e2338;
+    --sky-warm: #16283d;
+    --paper: #142639;
+    --ink: #f3ede0;
+    --ink-soft: #9fb4c6;
+    --title: #9db8e6;
+    --shadow: 0, 0, 0;
+    /* brick/terracotta/gold/evergreen/denim carry over unchanged — all
+       still read clearly against the darker surfaces above */
+  }
+}
+
+:root[data-theme="dark"] {
+  --sky: #0b1b2c;
+  --sky-deep: #0e2338;
+  --sky-warm: #16283d;
+  --paper: #142639;
+  --ink: #f3ede0;
+  --ink-soft: #9fb4c6;
+  --title: #9db8e6;
+  --shadow: 0, 0, 0;
+}
+
 * { box-sizing: border-box; }
 
 html, body { height: 100%; margin: 0; }
@@ -78,13 +111,13 @@ html, body { height: 100%; margin: 0; }
 body {
   font-family: var(--font-body);
   color: var(--ink);
-  background: var(--greige);
+  background: var(--sky);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-a { color: var(--coral-text); }
+a { color: var(--brick); }
 
 /* ---------------------------- Snowfall ---------------------------- */
 
@@ -129,13 +162,14 @@ a { color: var(--coral-text); }
 .banner {
   position: relative;
   flex: none;
-  background: var(--greige);
+  background: var(--sky);
   color: var(--ink);
   z-index: 800;
   padding: 1.6rem 0 0;
 }
 
 .banner__inner {
+  position: relative;
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 1.25rem;
@@ -146,7 +180,7 @@ a { color: var(--coral-text); }
   font-size: clamp(1.7rem, 3.4vw, 2.6rem);
   line-height: 1;
   margin: 0;
-  color: var(--purple);
+  color: var(--title);
 }
 
 /* "The 16th Annual" rides above the name at a fraction of its size */
@@ -174,16 +208,70 @@ a { color: var(--coral-text); }
   color: var(--ink-soft);
 }
 
-/* the illustrated band; the artwork's own ground colour matches --greige,
-   so it blends into the page rather than sitting in a box */
+/* ------------------------- Light/dark toggle ------------------------ */
+
+.theme-toggle {
+  position: absolute;
+  top: 0;
+  right: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  border: 0;
+  border-radius: 999px;
+  padding: .4rem .8rem .4rem .55rem;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-family: var(--font-body);
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(var(--shadow), .16);
+}
+
+.theme-toggle:hover { background: var(--sky-warm); }
+.theme-toggle:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.theme-toggle__icon {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  color: var(--gold);
+}
+
+.theme-toggle__icon--moon { color: var(--title); }
+
+/* Only one of the two icons shows at a time, and it names the action
+   ("switch to X") rather than the current state — so the moon (switch to
+   dark) is the default, shown whenever the effective theme is light. */
+.theme-toggle__icon--sun { display: none; }
+.theme-toggle__icon--moon { display: block; }
+
+:root[data-theme="dark"] .theme-toggle__icon--sun { display: block; }
+:root[data-theme="dark"] .theme-toggle__icon--moon { display: none; }
+
+@media (prefers-color-scheme: dark) {
+  /* No explicit choice saved — the OS preference decides, same as the
+     colour tokens above. */
+  :root:not([data-theme]) .theme-toggle__icon--sun { display: block; }
+  :root:not([data-theme]) .theme-toggle__icon--moon { display: none; }
+}
+
+@media (max-width: 560px) {
+  .theme-toggle__label { display: none; }
+  .theme-toggle { padding: .5rem; }
+}
+
+/* the illustrated band; art-directed per breakpoint via <picture> in
+   index.html, not just resized — see /city/README.md */
 .banner__scene {
+  position: relative;
+  display: block;
   width: 100%;
-  /* The artwork's drawn content occupies a fixed slice of its width
-     (~12.7%), so sizing the band in vw keeps every figure, chimney and
-     skate fully visible at any width instead of clipping them. The extra
-     0.9vw keeps a little of the file's headroom under the title. */
   height: clamp(88px, 13.6vw, 262px);
-  margin-top: .45rem;
+  margin-top: .6rem;
+  background: var(--sky-deep);
 }
 
 .banner__scene img {
@@ -191,26 +279,47 @@ a { color: var(--coral-text); }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* trims the empty headroom and footer the file carries, keeping the
-     drawn band centred */
-  object-position: 50% 57%;
+  /* Both source images carry a band of plain sky above the rooftops (the
+     mobile crop's own snowman-and-shopfront scene sits lower still) — this
+     keeps the buildings-and-street band in frame instead of showing mostly
+     empty sky, without touching the files themselves. */
+  object-position: 50% 82%;
 }
 
-/* Stand-in for the real header image this variant is meant to get — a flat
-   dashed box rather than quietly reusing the original artwork, so this page
-   never passes for a finished second look before it has one. Delete once a
-   real image replaces the <img> in index.html. */
-.banner__scene--placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px dashed var(--ink-soft, #6b5a7c);
-  border-radius: 12px;
-  background: var(--greige-warm, #f2efec);
-  color: var(--ink-soft, #6b5a7c);
-  font-size: .85rem;
-  text-align: center;
-  padding: 0 1rem;
+/* Night sky doesn't literally exist in either source file — both were
+   drawn for a daytime sky. Rather than needing a whole second illustration
+   per theme, darkening and cooling the one we have here reads as "dusk"
+   well enough to sit alongside the dark palette instead of clashing with
+   it. The filter alone still left a hard seam where the page's own dark
+   background met the (still fairly pale) sky band, so a soft gradient —
+   var(--sky) fading to transparent — is layered over the top of the image
+   on top of that to ease into it, the same trick a photo editor's
+   graduated filter does. */
+.banner__scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(to bottom, var(--sky) 0%, rgba(11, 27, 44, 0) 40%);
+}
+
+:root[data-theme="dark"] .banner__scene img {
+  filter: brightness(.55) saturate(.75) hue-rotate(-6deg);
+}
+
+:root[data-theme="dark"] .banner__scene::after {
+  opacity: .55;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .banner__scene img {
+    filter: brightness(.55) saturate(.75) hue-rotate(-6deg);
+  }
+
+  :root:not([data-theme="light"]) .banner__scene::after {
+    opacity: .55;
+  }
 }
 
 /* ----------------------------- Layout ----------------------------- */
@@ -246,7 +355,7 @@ a { color: var(--coral-text); }
   display: flex;
   align-items: center;
   gap: .5rem;
-  background: var(--greige-warm);
+  background: var(--sky-warm);
   border-radius: 999px;
   padding: .5rem .9rem;
 }
@@ -285,7 +394,7 @@ a { color: var(--coral-text); }
   border: 0;
   border-radius: 999px;
   padding: .32rem .7rem;
-  background: var(--greige-warm);
+  background: var(--sky-warm);
   color: var(--ink);
   display: inline-flex;
   align-items: center;
@@ -297,15 +406,15 @@ a { color: var(--coral-text); }
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--chip-color, var(--green));
+  background: var(--chip-color, var(--evergreen));
   flex: none;
 }
 
-.chip:hover { background: var(--mint); }
+.chip:hover { background: var(--sky-deep); }
 
 .chip[aria-pressed="true"] {
   background: var(--ink);
-  color: #fff;
+  color: var(--paper);
 }
 
 .chip:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
@@ -318,7 +427,7 @@ a { color: var(--coral-text); }
   padding: .2rem .6rem 1rem;
   overflow-y: auto;
   flex: 1 1 auto;
-  scrollbar-color: var(--teal-mid) transparent;
+  scrollbar-color: var(--denim) transparent;
 }
 
 .card {
@@ -334,14 +443,14 @@ a { color: var(--coral-text); }
 }
 
 .card:hover,
-.card.is-active { background: var(--greige-warm); }
+.card.is-active { background: var(--sky-warm); }
 
 .card__num {
   flex: none;
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: var(--card-color, var(--green));
+  background: var(--card-color, var(--evergreen));
   color: var(--card-ink, #fff);
   font-family: var(--font-display);
   font-weight: 600;
@@ -369,7 +478,7 @@ a { color: var(--coral-text); }
   flex: none;
   margin: 0;
   padding: .7rem 1rem .85rem;
-  background: var(--greige-warm);
+  background: var(--sky-warm);
   font-size: .72rem;
   color: var(--ink-soft);
 }
@@ -381,13 +490,13 @@ a { color: var(--coral-text); }
   min-height: 0;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--mint);
+  background: var(--sky-deep);
 }
 
 #map {
   position: absolute;
   inset: 0;
-  background: var(--mint);
+  background: var(--sky-deep);
 }
 
 .noscript {
@@ -434,7 +543,7 @@ a { color: var(--coral-text); }
   background: var(--paper);
   color: var(--ink);
   border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(62, 42, 86, .13);
+  box-shadow: 0 8px 24px rgba(var(--shadow), .22);
   padding: 0;
 }
 
@@ -525,9 +634,9 @@ a { color: var(--coral-text); }
   font-size: .82rem;
   font-weight: 700;
   text-decoration: none;
-  color: #fff;
-  /* deep purple rather than the category colour: gold and pink can't carry
-     white label text at this size */
+  color: var(--paper);
+  /* deep ink rather than the category colour: gold and pale swatches can't
+     carry white label text at this size */
   background: var(--ink);
   border-radius: 999px;
   padding: .4rem .95rem;
@@ -544,7 +653,7 @@ a { color: var(--coral-text); }
 
 .leaflet-control-zoom {
   border: 0 !important;
-  box-shadow: 0 4px 14px rgba(62, 42, 86, .14) !important;
+  box-shadow: 0 4px 14px rgba(var(--shadow), .2) !important;
   border-radius: 14px !important;
   overflow: hidden;
 }
@@ -553,23 +662,23 @@ a { color: var(--coral-text); }
   background: var(--paper) !important;
   color: var(--ink) !important;
   border: 0 !important;
-  border-bottom: 1px solid var(--greige) !important;
+  border-bottom: 1px solid var(--sky) !important;
   font-weight: 500;
   font-family: var(--font-display);
 }
 
 .leaflet-control-zoom a:last-child { border-bottom: 0 !important; }
-.leaflet-control-zoom a:hover { background: var(--greige-warm) !important; }
+.leaflet-control-zoom a:hover { background: var(--sky-warm) !important; }
 
 .leaflet-control-attribution {
   background: rgba(255, 255, 255, .82) !important;
-  color: var(--ink-soft) !important;
+  color: #1e2f45 !important;
   font-size: 10px;
   border-radius: 10px 0 0 0;
   padding: 2px 7px !important;
 }
 
-.leaflet-control-attribution a { color: var(--ink-soft) !important; }
+.leaflet-control-attribution a { color: #1e2f45 !important; }
 
 /* Shared "paper card" look for on-map Leaflet controls that aren't the
    zoom/attribution chrome — currently just the tile-failure notice. Kept
@@ -584,7 +693,7 @@ a { color: var(--coral-text); }
   pointer-events: none;
   background: var(--paper);
   border-radius: var(--radius-md);
-  box-shadow: 0 6px 18px rgba(62, 42, 86, .12);
+  box-shadow: 0 6px 18px rgba(var(--shadow), .2);
   padding: .7rem .85rem;
   font-size: .76rem;
   line-height: 1.7;
@@ -605,7 +714,7 @@ a { color: var(--coral-text); }
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--swatch, var(--green));
+  background: var(--swatch, var(--evergreen));
   flex: none;
 }
 
@@ -643,10 +752,10 @@ a { color: var(--coral-text); }
   line-height: 1.5;
 }
 
-.tile-warning h2 { color: var(--coral); }
+.tile-warning h2 { color: var(--brick); }
 
 .tile-warning code {
-  background: var(--greige-warm);
+  background: var(--sky-warm);
   border-radius: 4px;
   padding: 0 .25em;
   font-size: .95em;
@@ -671,7 +780,15 @@ a { color: var(--coral-text); }
 
   .banner { padding: 1.1rem 0 0; }
   .banner__inner { padding: 0 1rem; }
-  .banner__scene { height: 88px; }
+  .theme-toggle { right: 1rem; }
+
+  /* The mobile crop is its own, roughly-square composition (snowman,
+     GIFTS shopfront, the Richmond Magazine sign) rather than a thin slice
+     of the wide desktop scene, so it earns noticeably more height than
+     root's compact 88px mobile band — tall enough to read as a real
+     header, short enough that the directory is still one scroll away. */
+  .banner__scene { height: 46vw; min-height: 168px; max-height: 260px; }
+  .banner__scene img { object-position: 50% 78%; }
 
   /* Tall enough that a full popup card (address + hours + phone can run to
      ~440px) fits without the map's rounded-corner clip cutting it off —
@@ -714,11 +831,11 @@ a { color: var(--coral-text); }
     border-radius: 999px;
     padding: .55rem 1rem;
     background: var(--ink);
-    color: #fff;
+    color: var(--sky);
     font-family: var(--font-body);
     font-size: .82rem;
     font-weight: 700;
-    box-shadow: 0 6px 18px rgba(62, 42, 86, .3);
+    box-shadow: 0 6px 18px rgba(var(--shadow), .4);
     cursor: pointer;
     opacity: 0;
     transform: translateY(8px);
