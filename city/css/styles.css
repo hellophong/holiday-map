@@ -165,14 +165,24 @@ a { color: var(--brick); }
   background: var(--sky);
   color: var(--ink);
   z-index: 800;
-  padding: 1.6rem 0 0;
 }
 
+/* Sits in normal flow, not absolutely positioned — .banner__scene below is
+   what overlaps it (pulled up with a negative margin), not the other way
+   around. That keeps the text's own layout (and the toggle button
+   anchored to it) completely ordinary; only the illustration needs to
+   know anything about the overlap. */
 .banner__inner {
   position: relative;
+  z-index: 2;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1.25rem;
+  /* The bottom value is the overlap buffer .banner__scene's negative
+     margin pulls up into — see the comment there. It needs to clear the
+     tallest line of text (.banner__main) plus some, not just sit flush
+     under the subtitle, since the pulled-up image can end up behind
+     *either* depending on how far the negative margin reaches. */
+  padding: 1.6rem 1.25rem 2.75rem;
 }
 
 .banner__title {
@@ -265,30 +275,29 @@ a { color: var(--brick); }
 
 /* the illustrated band; art-directed per breakpoint via <picture> in
    index.html, not just resized — see /city/README.md. Both source files
-   are transparent (no sky rect of their own — the -nobg assets). Rather
-   than cropping to a fixed band the way a "cover" fit would, this caps
-   how *tall* the art can get and otherwise lets it render at its own
-   natural ratio — nothing is ever cut off the top or bottom, and the
-   page's own background (not a mismatched illustrated sky) shows through
-   everywhere the art doesn't draw, so there's no seam to speak of between
-   the two. The max-height is what keeps a wide desktop window from
-   turning the whole banner into as tall as the art's own ratio implies
-   and squeezing the fixed-viewport layout below it; on an unusually
-   narrow window max-width takes over first and shrinks it instead — one
-   of the two always binds, the image is simply never cropped either way. */
+   are transparent (no sky rect of their own — the -nobg assets), which is
+   what makes this overlap work at all: the art spans the full window
+   width edge to edge (width: 100%, no max-width, no side padding — unlike
+   .banner__inner above it, which stays readably narrow), and the negative
+   margin pulls it up to tuck under the headline text rather than leaving
+   a gap of flat --sky colour between the two. It only reads as "under the
+   text" instead of "on top of it" because the art itself has a margin of
+   plain sky above its own rooflines — this negative value is deliberately
+   smaller than that built-in margin, confirmed against the actual
+   rendered art (not just eyeballed) so the roofline never lands above the
+   subtitle's baseline. If a future asset swap changes how much clear sky
+   the art itself carries at the top, re-check that margin before assuming
+   this number still holds. */
 .banner__scene {
-  display: flex;
-  justify-content: center;
+  display: block;
   width: 100%;
-  margin-top: .6rem;
+  margin-top: -1.6rem;
 }
 
 .banner__scene img {
   display: block;
-  width: auto;
+  width: 100%;
   height: auto;
-  max-width: 100%;
-  max-height: 260px;
 }
 
 /* Night sky doesn't literally exist in the source files — both were
@@ -765,17 +774,15 @@ a { color: var(--brick); }
     min-height: auto;
   }
 
-  .banner { padding: 1.1rem 0 0; }
-  .banner__inner { padding: 0 1rem; }
+  .banner__inner { padding: 1.1rem 1rem 2.1rem; }
   .theme-toggle { right: 1rem; }
 
   /* The mobile crop is its own, roughly-square composition (snowman,
      GIFTS shopfront, the Richmond Magazine sign) rather than a thin slice
-     of the wide desktop scene, and mobile has no fixed-viewport layout
-     fighting it for space below (the page just scrolls) — so the cap can
-     be more generous than desktop's without squeezing anything. Uncropped,
-     it reads as a real header rather than root's compact 88px band. */
-  .banner__scene img { max-height: 320px; }
+     of the wide desktop scene, so its own clear-sky margin (and therefore
+     the safe overlap amount) differs from the desktop figure above — this
+     one's checked against that image specifically, same way. */
+  .banner__scene { margin-top: -1.3rem; }
 
   /* Tall enough that a full popup card (address + hours + phone can run to
      ~440px) fits without the map's rounded-corner clip cutting it off —

@@ -28,22 +28,33 @@ Two separate illustrations, not one image resized — `index.html` uses `<pictur
 square street-corner scene: the GIFTS shopfront, a snowman, the Richmond Magazine sign)
 rather than a narrower slice of the wide desktop banner.
 
-Both `-nobg` files are transparent — no sky rect of their own — which is what makes the
-banner read as seamless: `.banner__scene img` is sized by `max-width: 100%` /
-`max-height` (260px desktop, 320px mobile) and nothing else, the plain "cap whichever
-dimension would otherwise overflow" pattern an ordinary `<img>` already gives you for
-free. Nothing here ever crops the art — nothing needed to, once it had no background of
-its own to crop *down to* a band. A version with a background rect (the original
-`holiday-header2.svg` / `-mobile.svg`, still in `assets/` but unused) would need cropping
-again to avoid showing a mismatched rectangle of illustrated sky; don't switch back to one
-without also reintroducing that `object-fit: cover` + `object-position` handling.
+Both `-nobg` files are transparent — no sky rect of their own — which is what makes two
+things possible at once: the art spans the *entire window width* (`.banner__scene { width:
+100% }`, sitting outside `.banner__inner`'s 1400px-max reading column so nothing narrows
+it), and the headline sits *overlapping* it rather than stacked above it in its own block.
+`.banner__scene` is pulled up with a negative `margin-top` to tuck under the header text;
+it only reads as "under the text" instead of "on top of it" because the art carries a
+margin of plain sky above its own rooflines, and the negative value is kept smaller than
+that — confirmed by literally decoding the rendered SVG's alpha channel and finding the
+first non-transparent row, not eyeballed, since "how much clear sky is there" isn't
+something you can read off the source file's viewBox. Both breakpoints have their own
+number (mobile's composition carries a different margin) — see the comment above
+`.banner__scene` for how to re-check it if a future asset swap changes that margin.
 
-The max-height figures exist for desktop's sake, not the art's: the fixed one-viewport
-layout below the banner (`.layout { flex: 1 1 auto }`, no page scroll) gets squeezed if
-the banner is allowed to grow as tall as the illustration's own ratio implies on a wide
-window, so it's capped — the image just renders smaller (and narrower, `max-width` and
-`max-height` shrinking it together) rather than ever being cut off. Mobile has no such
-fight (the page already scrolls), hence the taller cap there.
+A version with a background rect (the original `holiday-header2.svg` / `-mobile.svg`,
+still in `assets/` but unused) can't do either of those: cropping it down to a band (via
+`object-fit: cover`) is what the old version of this file described, and that crop is
+fundamentally at odds with an edge-to-edge, overlapping banner — don't switch back to a
+background-carrying asset without rethinking this section along with it.
+
+Nothing here caps how tall the art can get on a wide desktop window (earlier drafts of
+this did, specifically to protect the fixed one-viewport layout below — `.layout { flex: 1
+1 auto }`, no page scroll — from being squeezed). A very short, wide browser window (a
+1280×720 laptop, say) does end up with a visibly smaller map underneath as a result; it's
+still fully usable, and the popup's own `maxHeight` safety net (see the root's
+`CLAUDE.md`) is exactly the thing designed to cover a short desktop window regardless of
+what's above the map, so this wasn't treated as a regression worth trading the full-bleed
+look away for.
 
 Neither file was drawn with a night sky, so dark mode doesn't swap in a second image — it
 darkens and cools the one it has (`filter: brightness() saturate() hue-rotate()`), which
