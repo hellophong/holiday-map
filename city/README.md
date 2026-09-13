@@ -45,13 +45,14 @@ part of the same content column rather than a full-bleed hero strip. Mobile matc
 `.layout`'s own mobile padding specifically (`.8rem`, not `.banner__inner`'s `1rem`) since
 the two differ slightly and matching the sidebar's actual width is the point.
 
-Neither file was drawn with a night sky, so dark mode doesn't swap in a second image — it
-darkens and cools the one it has (`filter: brightness() saturate() hue-rotate()`), which
-reads as dusk well enough without needing a whole second illustration per theme. That's
-the only treatment dark mode needs: with no background rect to blend, there's no seam for
-a gradient overlay to hide. If a real night-sky version ever gets drawn, swap it in via
-the same `[data-theme="dark"]` / `prefers-color-scheme` pair already used for the CSS
-variables below, rather than fighting the filter approach further.
+Night mode does **not** darken this artwork — an earlier version ran it through
+`filter: brightness() saturate() hue-rotate()` to read as dusk, but that just made the art
+look off rather than intentionally nocturnal, so night/day mode now only restyles the
+surrounding chrome (CSS variables, map tiles) and leaves the header image's own
+brightness/saturation untouched in both themes. If a real night-sky illustration ever
+gets drawn, swap it in via the same `[data-theme="dark"]` / `prefers-color-scheme` pair
+already used for the CSS variables below — that's the place for a theme-driven header
+look, not a filter on the daytime art.
 
 ## Palette
 
@@ -72,7 +73,10 @@ root too.
 ## Light/dark mode
 
 A toggle in the banner (`#themeToggle`) flips `<html data-theme>` between `"light"` and
-`"dark"`, persisted in `localStorage` under `cityTheme`. A visitor who's never touched it
+`"dark"`, persisted in `localStorage` under `cityTheme`. The toggle's visible label reads
+"Night mode" / "Day mode" (desktop only — the label text is hidden ≤560px, leaving just
+the sun/moon icon) even though the underlying attribute value, storage key and CSS guards
+all still say `light`/`dark`; only the user-facing wording changed. A visitor who's never touched it
 gets `prefers-color-scheme` via CSS alone — nothing in `index.html`'s inline script writes
 an attribute until the toggle is actually clicked, so an explicit pick is the only thing
 that can override the OS setting, and it keeps doing so even if the OS setting changes
