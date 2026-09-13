@@ -311,7 +311,11 @@ a { color: var(--brick); }
 
 @media (max-width: 560px) {
   .theme-toggle__label { display: none; }
-  .theme-toggle { padding: .5rem; }
+  .theme-toggle { padding: .42rem; }
+  .theme-toggle__icon { width: 15px; height: 15px; }
+  .music-toggle { width: 30px; height: 30px; }
+  .music-toggle__icon { width: 15px; height: 15px; }
+  .toggle-group { gap: .4rem; }
 }
 
 /* the illustrated band; art-directed per breakpoint via <picture> in
