@@ -159,53 +159,25 @@ a { color: var(--brick); }
 
 /* ----------------------------- Banner ----------------------------- */
 
-/* Desktop only (the ≤860px query below resets this back to an ordinary
-   flow height): fixed at a quarter of the viewport so the sidebar/map
-   below stay the main event rather than competing with the header for
-   attention. flex-direction: column + overflow: hidden is what makes that
-   a hard cap rather than a suggestion — .banner__scene (flex: 1 1 auto)
-   simply gets whatever's left after .banner__inner's own height, and its
-   image is object-fit: contain within that, so nothing is ever clipped
-   by the overflow — it just renders smaller than full width when the
-   leftover space is this tight. min-height is a floor for unusually short
-   windows, so the headline text itself never has to shrink to fit. */
 .banner {
   position: relative;
   flex: none;
   background: var(--sky);
   color: var(--ink);
   z-index: 800;
-  display: flex;
-  flex-direction: column;
-  height: 25vh;
-  min-height: 190px;
-  overflow: hidden;
 }
 
-/* Sits in normal flow, not absolutely positioned — .banner__scene below is
-   what overlaps it (pulled up with a negative margin), not the other way
-   around. That keeps the text's own layout (and the toggle button
-   anchored to it) completely ordinary; only the illustration needs to
-   know anything about the overlap. flex: none keeps it at its own natural
-   height regardless of .banner's fixed height — .banner__scene is the one
-   that yields. */
 .banner__inner {
   position: relative;
   z-index: 2;
-  flex: none;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
-  /* The bottom value is the overlap buffer .banner__scene's negative
-     margin pulls up into — see the comment there. It needs to clear the
-     tallest line of text (.banner__main) plus some, not just sit flush
-     under the subtitle, since the pulled-up image can end up behind
-     *either* depending on how far the negative margin reaches. The top
-     value also clears the toggle button, which sits at its own fixed
-     offset rather than flush with .banner__inner's top edge — see
+  /* The top value also clears the toggle button, which sits at its own
+     fixed offset rather than flush with .banner__inner's top edge — see
      .theme-toggle. */
-  padding: 2.35rem 1.25rem 1.5rem;
+  padding: 2.35rem 1.25rem 0;
 }
 
 .banner__title {
@@ -301,40 +273,32 @@ a { color: var(--brick); }
 
 /* the illustrated band; art-directed per breakpoint via <picture> in
    index.html, not just resized — see /city/README.md. Both source files
-   are transparent (no sky rect of their own — the -nobg assets).
+   are transparent (no sky rect of their own) and drawn at a genuinely
+   banner-shaped ratio already (2000x300 desktop, 500x260 mobile) — wide
+   and short rather than needing to be cropped down to that shape, so a
+   plain width: 100%; height: auto is enough to show the whole thing
+   uncropped at whatever width it's given.
 
-   flex: 1 1 auto + min-height: 0 is what makes this fill exactly
-   .banner's leftover height on desktop (see .banner, capped to 25vh) —
-   object-fit: contain on the img is the other half of that contract:
-   whatever box this ends up with, the art scales to fit inside it
-   without cropping, full width only if the box happens to be wide
-   enough relative to its height to allow that. At a 25vh cap the art
-   ends up quite short (well under 150px tall on most windows), which
-   also shrinks its own built-in margin of clear sky above the rooflines
-   down to just a few pixels — nowhere near enough to safely pull the art
-   up under the text the way the previous (much taller, uncapped)
-   version of this could. So no overlap here despite the file/rule name:
-   a small positive gap instead, sized the same way — confirmed against
-   the actual rendered art's alpha channel at its real on-page size, not
-   assumed to hold from the pre-25vh numbers.
-
-   On mobile .banner isn't height-constrained at all, so the art renders
-   at its full natural size and genuinely has room to be pulled up under
-   the text — see the ≤860px override for that (different, negative)
-   figure and its own margin check. */
+   That width matches .banner__inner above it exactly on purpose — same
+   max-width, same horizontal padding — so the art lines up with the
+   sidebar+map below rather than the window edges: this is deliberately
+   NOT full window width the way an earlier version of this was. Mobile
+   overrides the padding to match .layout's own mobile figure instead,
+   since .banner__inner's mobile padding differs slightly (see the ≤860px
+   block). */
 .banner__scene {
   display: block;
-  flex: 1 1 auto;
-  min-height: 0;
+  max-width: 1400px;
   width: 100%;
-  margin-top: .35rem;
+  margin: .75rem auto 0;
+  padding: 0 1.25rem;
+  box-sizing: border-box;
 }
 
 .banner__scene img {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: contain;
+  height: auto;
 }
 
 /* Night sky doesn't literally exist in the source files — both were
@@ -811,28 +775,13 @@ a { color: var(--brick); }
     min-height: auto;
   }
 
-  /* The 25vh cap above is desktop-only: mobile already scrolls the page,
-     so there's no "sidebar/map squeezed out" problem to solve, and a
-     height-constrained flex column here would force the same
-     object-fit: contain letterboxing desktop now accepts, for no reason —
-     mobile keeps the art at full width and its own natural height. */
-  .banner {
-    display: block;
-    height: auto;
-    min-height: 0;
-    overflow: visible;
-  }
-
-  .banner__inner { flex: none; padding: 1.1rem 1rem 2.1rem; }
+  .banner__inner { padding: 1.1rem 1rem 0; }
   .theme-toggle { top: 1.1rem; right: 1rem; }
 
-  /* The mobile crop is its own, roughly-square composition (snowman,
-     GIFTS shopfront, the Richmond Magazine sign) rather than a thin slice
-     of the wide desktop scene, so its own clear-sky margin (and therefore
-     the safe overlap amount) differs from the desktop figure above — this
-     one's checked against that image specifically, same way. */
-  .banner__scene { flex: none; margin-top: -1.3rem; }
-  .banner__scene img { height: auto; }
+  /* .banner__inner's mobile padding above is 1rem a side, but .layout's
+     (the sidebar's own width) is .8rem — matching *that* one, not
+     .banner__inner's, is the whole point here. */
+  .banner__scene { padding: 0 .8rem; }
 
   /* Tall enough that a full popup card (address + hours + phone can run to
      ~440px) fits without the map's rounded-corner clip cutting it off —

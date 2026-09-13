@@ -11,7 +11,7 @@ the repo root rather than replacing it. Both are live at once:
 | Shared from the parent folder | Owned by `/city/` |
 |---|---|
 | `../vendor/leaflet/`, `../vendor/fonts/` | `css/styles.css` — a snowy Richmond storefront street, not the original's flat illustrated scene |
-| `../js/app.js` — same map/popup/filter logic | The header artwork — `assets/holiday-header2-nobg.svg` (desktop), `assets/holiday-header2-mobile-nobg.svg` (≤860px) |
+| `../js/app.js` — same map/popup/filter logic | The header artwork — `assets/holiday-header2.svg` (desktop), `assets/holiday-header2-mobile.svg` (≤860px) |
 | `../data/businesses.json` — same 11 listings | This `index.html`, including the light/dark toggle |
 
 `index.html` sets `window.DATA_URL = "../data/businesses.json"` before loading the shared
@@ -28,54 +28,30 @@ Two separate illustrations, not one image resized — `index.html` uses `<pictur
 square street-corner scene: the GIFTS shopfront, a snowman, the Richmond Magazine sign)
 rather than a narrower slice of the wide desktop banner.
 
-Both `-nobg` files are transparent — no sky rect of their own — which is what makes the
-headline sit *overlapping* the art rather than stacked above it in its own block, on both
-breakpoints: `.banner__scene` (or its img, on desktop — see below) is pulled up with a
-small negative `margin-top` to tuck under the header text, and it only reads as "under the
-text" instead of "on top of it" because the art carries a margin of plain sky above its
-own rooflines and the negative value is kept smaller than that. That margin isn't
-something you can read off the source file's viewBox — it's confirmed by literally
-decoding the rendered art's alpha channel at its real on-page size and finding the first
-non-transparent row. A version with a background rect (the original `holiday-header2.svg`
-/ `-mobile.svg`, still in `assets/` but unused) couldn't do this at all: cropping it down
-to a band (`object-fit: cover`) is what an older version of this file described, and that
-crop is fundamentally at odds with an overlapping banner.
+Both files are transparent (no sky rect of their own) and drawn at a genuinely
+banner-shaped ratio already — 2000×300 desktop, 500×260 mobile, wide and short rather
+than a taller scene that would need cropping down to that shape. That's what makes a
+plain `width: 100%; height: auto` enough to show either one whole, at whatever width it's
+given, with no `object-fit` gymnastics: the ratio itself is already right for a header.
+(Earlier versions of both this file and this asset were a much taller illustration
+needing real cropping or letterboxing to fit a banner — if a future asset swap ever goes
+back to something that tall, expect to reintroduce that.)
 
-**Desktop and mobile size the art completely differently, though** — this isn't just a
-breakpoint tweak, it's two different strategies:
-
-- **Desktop** caps the whole banner (`.banner`) at `height: 25vh` (a `min-height` floor
-  protects the headline text on very short windows) so the sidebar/map stay the visually
-  dominant part of the page rather than competing with the header — an explicit ask after
-  an earlier draft let the banner grow as tall as the art's own ratio implied on a wide
-  window, which made the header the biggest thing on the screen. `.banner__scene` is
-  `flex: 1 1 auto` inside that fixed-height column, so it only ever gets whatever's left
-  after the headline text's own height, and the img is `object-fit: contain` within that —
-  never cropped, but also usually well short of full window width, since there generally
-  isn't much leftover height to work with at a 25vh cap. The overlap margin here is a small
-  *positive* gap, not a pull-up: at this size the art's own clear-sky margin shrinks (in
-  real pixels) right along with it, down to a few px — nowhere near enough room to safely
-  pull it up under the text the way the taller, uncapped version could.
-- **Mobile** doesn't have a fixed-viewport layout to protect (the page already scrolls), so
-  none of that applies: the art renders at its full natural size, `width: 100%` of the
-  window, and *does* get pulled up under the text with a real negative margin, the same way
-  desktop's used to before the 25vh cap.
-
-A short, wide desktop window (1280×720, say) still ends up with a visibly smaller map
-underneath than a taller one — the fixed 25vh eats a bigger fraction of a short window —
-but it stays fully usable, and the popup's own `maxHeight` safety net (see the root's
-`CLAUDE.md`) is exactly the thing designed to cover a short desktop window regardless of
-what's above the map.
+**The art's width matches `.banner__inner` — same `max-width: 1400px`, same horizontal
+padding — which is deliberately also `.layout`'s own content width (the sidebar + map
+below it), not the window's.** An earlier version of this spanned the full browser
+window edge to edge; this one lines up with the directory instead, so the banner reads as
+part of the same content column rather than a full-bleed hero strip. Mobile matches
+`.layout`'s own mobile padding specifically (`.8rem`, not `.banner__inner`'s `1rem`) since
+the two differ slightly and matching the sidebar's actual width is the point.
 
 Neither file was drawn with a night sky, so dark mode doesn't swap in a second image — it
 darkens and cools the one it has (`filter: brightness() saturate() hue-rotate()`), which
 reads as dusk well enough without needing a whole second illustration per theme. That's
-the *only* treatment dark mode needs now: with no background rect to blend, there's no
-seam left for a gradient overlay to hide (an earlier version of this had one, for the
-previous background-carrying assets — removed along with them). If a real night-sky
-version ever gets drawn, swap it in via the same `[data-theme="dark"]` /
-`prefers-color-scheme` pair already used for the CSS variables below, rather than fighting
-the filter approach further.
+the only treatment dark mode needs: with no background rect to blend, there's no seam for
+a gradient overlay to hide. If a real night-sky version ever gets drawn, swap it in via
+the same `[data-theme="dark"]` / `prefers-color-scheme` pair already used for the CSS
+variables below, rather than fighting the filter approach further.
 
 ## Palette
 
