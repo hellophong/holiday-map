@@ -301,12 +301,20 @@ a { color: var(--brick); }
   height: auto;
 }
 
-/* The header art keeps its own brightness/saturation across themes on
-   purpose — it's a daytime illustration either way, and darkening it to
-   read as "dusk" made it look like something was wrong with the image
-   rather than like an intentional night look. Night/day mode now only
-   restyles the surrounding UI (chrome, map tiles); the art itself is
-   untouched. */
+/* Night mode gets a light -30% brightness dim on the header art — enough
+   to feel like it's sitting under the dark UI rather than looking pasted
+   on at full daylight brightness, but far short of the old dusk filter
+   (which also cooled/desaturated it and made it look washed out). No
+   saturation or hue change here on purpose: brightness only. */
+:root[data-theme="dark"] .banner__scene img {
+  filter: brightness(.7);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .banner__scene img {
+    filter: brightness(.7);
+  }
+}
 
 /* ----------------------------- Layout ----------------------------- */
 

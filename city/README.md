@@ -45,14 +45,14 @@ part of the same content column rather than a full-bleed hero strip. Mobile matc
 `.layout`'s own mobile padding specifically (`.8rem`, not `.banner__inner`'s `1rem`) since
 the two differ slightly and matching the sidebar's actual width is the point.
 
-Night mode does **not** darken this artwork — an earlier version ran it through
-`filter: brightness() saturate() hue-rotate()` to read as dusk, but that just made the art
-look off rather than intentionally nocturnal, so night/day mode now only restyles the
-surrounding chrome (CSS variables, map tiles) and leaves the header image's own
-brightness/saturation untouched in both themes. If a real night-sky illustration ever
+Night mode dims this artwork by -30% brightness (`filter: brightness(.7)`) — a plain
+brightness cut, no saturation or hue change. An earlier version also cooled and
+desaturated it (`saturate() hue-rotate()`) to read as dusk, but that made the art look
+washed out rather than intentionally nocturnal; a version after that removed the filter
+entirely, but the art then looked pasted on at full daylight brightness against the dark
+UI. Brightness-only at -30% is the middle ground. If a real night-sky illustration ever
 gets drawn, swap it in via the same `[data-theme="dark"]` / `prefers-color-scheme` pair
-already used for the CSS variables below — that's the place for a theme-driven header
-look, not a filter on the daytime art.
+already used for the CSS variables below, rather than pushing the filter further.
 
 ## Palette
 
