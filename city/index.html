@@ -32,19 +32,39 @@
 
   <header class="banner">
     <div class="banner__inner">
-      <button type="button" id="themeToggle" class="theme-toggle">
-        <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-          <circle cx="10" cy="10" r="4.2" fill="currentColor" />
-          <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
-            <path d="M10 1.6v2.3M10 16.1v2.3M18.4 10h-2.3M3.9 10H1.6" />
-            <path d="M15.6 4.4l-1.6 1.6M6 14l-1.6 1.6M15.6 15.6L14 14M6 6L4.4 4.4" />
-          </g>
-        </svg>
-        <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-          <path d="M17.3 12.3A7.3 7.3 0 0 1 7.7 2.7a7.3 7.3 0 1 0 9.6 9.6z" fill="currentColor" />
-        </svg>
-        <span class="theme-toggle__label"></span>
-      </button>
+      <div class="toggle-group">
+        <!-- Icon-only on every breakpoint on purpose — unlike the theme
+             toggle, this never carries a text label at any width. -->
+        <button type="button" id="musicToggle" class="music-toggle" aria-pressed="false" aria-label="Play background music">
+          <svg class="music-toggle__icon music-toggle__icon--note" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 18V5l12-2v13" />
+            <circle cx="6" cy="18" r="3" />
+            <circle cx="18" cy="16" r="3" />
+          </svg>
+          <svg class="music-toggle__icon music-toggle__icon--muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 18V5l12-2v13" />
+            <circle cx="6" cy="18" r="3" />
+            <circle cx="18" cy="16" r="3" />
+            <line x1="3" y1="3" x2="21" y2="21" />
+          </svg>
+        </button>
+
+        <button type="button" id="themeToggle" class="theme-toggle">
+          <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <circle cx="10" cy="10" r="4.2" fill="currentColor" />
+            <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+              <path d="M10 1.6v2.3M10 16.1v2.3M18.4 10h-2.3M3.9 10H1.6" />
+              <path d="M15.6 4.4l-1.6 1.6M6 14l-1.6 1.6M15.6 15.6L14 14M6 6L4.4 4.4" />
+            </g>
+          </svg>
+          <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M17.3 12.3A7.3 7.3 0 0 1 7.7 2.7a7.3 7.3 0 1 0 9.6 9.6z" fill="currentColor" />
+          </svg>
+          <span class="theme-toggle__label"></span>
+        </button>
+      </div>
+
+      <audio id="bgMusic" src="assets/jingle-bells-slow-piano-loop.ogg" loop preload="none"></audio>
 
       <h1 class="banner__title" id="siteTitle">
         <span class="banner__lead" id="siteTitleLead">The 16th Annual</span>
@@ -160,6 +180,39 @@
       }
 
       sync();
+    })();
+
+    (function () {
+      var toggle = document.getElementById("musicToggle");
+      var audio = document.getElementById("bgMusic");
+
+      function sync(playing) {
+        toggle.setAttribute("aria-pressed", String(playing));
+        toggle.setAttribute("aria-label", playing ? "Mute background music" : "Play background music");
+      }
+
+      toggle.addEventListener("click", function () {
+        if (audio.paused) {
+          // play() returns a promise that rejects if the browser blocks it;
+          // only flip the icon once playback actually starts, so a block
+          // doesn't leave the button lying about what's playing.
+          var result = audio.play();
+          if (result && result.then) {
+            result.then(function () { sync(true); }).catch(function () { sync(false); });
+          } else {
+            sync(true);
+          }
+        } else {
+          audio.pause();
+          sync(false);
+        }
+      });
+
+      // Covers a pause/stop triggered some other way (e.g. browser media
+      // controls), so the icon never drifts from the audio element's own
+      // state.
+      audio.addEventListener("pause", function () { sync(false); });
+      audio.addEventListener("play", function () { sync(true); });
     })();
   </script>
 </body>

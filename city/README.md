@@ -13,6 +13,7 @@ the repo root rather than replacing it. Both are live at once:
 | `../vendor/leaflet/`, `../vendor/fonts/` | `css/styles.css` — a snowy Richmond storefront street, not the original's flat illustrated scene |
 | `../js/app.js` — same map/popup/filter logic | The header artwork — `assets/holiday-header2.svg` (desktop), `assets/holiday-header2-mobile.svg` (≤860px) |
 | `../data/businesses.json` — same 11 listings | This `index.html`, including the light/dark toggle |
+| | `assets/jingle-bells-slow-piano-loop.ogg` — background music, off by default |
 
 `index.html` sets `window.DATA_URL = "../data/businesses.json"` before loading the shared
 `app.js`, so both pages read the same business data — add a listing once, it shows up in
@@ -99,3 +100,26 @@ map tiles follow a visitor's OS preference on its own. The toggle's click handle
 flipping `data-theme`, which swaps the live tile layer's URL via Leaflet's `setUrl()` —
 no page reload, no rebuilding the layer. The OS-preference `change` listener calls it too,
 for a visitor who never made an explicit pick and whose system flips theme mid-visit.
+
+## Background music
+
+A second small round button (`#musicToggle`) sits to the left of the theme toggle in the
+same `.toggle-group`, and plays `assets/jingle-bells-slow-piano-loop.ogg` on loop through
+a hidden `<audio>` element. Unlike the theme toggle, it's icon-only at every width — no
+label span at all, not just one hidden below a breakpoint — since a text caption next to
+a self-explanatory note icon would be redundant chrome sitting right in the header.
+
+Same "the icon names the action" convention as the sun/moon: nothing plays on load, so
+the plain note icon is the default (music icon, meaning "click to play"), and it swaps to
+a note with a line through it once playback actually starts (meaning "click to mute").
+That swap is driven off the `<audio>` element's own `play`/`pause` events rather than
+firing straight from the click handler, so the icon can't drift out of sync with what's
+actually playing — including a pause triggered some other way, like the OS media keys or
+another tab's media session claiming control.
+
+Starting playback only ever happens from the click handler, never on load or on a theme
+change, so there's no autoplay-with-sound to run into: browsers only block that without a
+user gesture, and a button click is one. `audio.play()` returns a promise that can still
+reject (a very restrictive browser setting, e.g.), so the click handler waits on it and
+only flips the icon to "playing" once it actually resolves — otherwise the icon stays on
+"play" rather than lying about audio that never started.
